@@ -138,10 +138,10 @@ window.SF = (function () {
 
   const spellGroups = [
     ['Channel Divinity', ['sanctuary', 'divineSpark', 'turnUndead']],
+    ['Features', ['vigilant', 'eyes']],
     ['Cantrips (free)', ['toll', 'sacred', 'guidance', 'thaumaturgy', 'spare']],
     ['Level 1', ['bless', 'healingWord', 'guidingBolt', 'command', 'faerieFire', 'sleep']],
-    ['Level 2', ['spiritualWeapon', 'aid', 'holdPerson', 'moonbeam', 'seeInvis']],
-    ['Other', ['vigilant', 'eyes']]
+    ['Level 2', ['spiritualWeapon', 'aid', 'holdPerson', 'moonbeam', 'seeInvis']]
   ];
 
   const charlieActions = [

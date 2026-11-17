@@ -11,8 +11,6 @@
   const pips = (key, val, max, label) =>
     `<span class="pips" role="group" aria-label="${label}">${Array.from({ length: max }, (_, i) =>
       `<button type="button" class="pip ${i < val ? 'on' : ''}" data-act="pip" data-arg="${key}:${i}" aria-label="${label} ${i + 1}"></button>`).join('')}</span>`;
-  const lvlLabel = (l) => (l === 0 ? 'Cantrip' : l === 'cd' ? 'Channel Divinity' : l === 'free' ? 'Feature' : 'Level ' + l);
-  const LVL_CLASS = { 0: 'l0', 1: 'l1', 2: 'l2', cd: 'lcd', free: 'lfree' };
 
   const TABS = {
     pim: [['gevecht', '⚔️', 'Combat'], ['spells', '✨', 'Spells'], ['sheet', '📋', 'Sheet'], ['dice', '🎲', 'Dice'], ['regels', '📖', 'Rules']],
@@ -140,33 +138,37 @@
   /* ---------- Spells / Acties ---------- */
   function spellButtons(id) {
     const c = C('pim'), sp = D.spells[id];
-    if (id === 'toll') return btn('Target hurt', 'cast', 'toll|injured') + btn('Target unhurt', 'cast', 'toll', 'ghost');
-    if (id === 'spiritualWeapon' && c.conc === id) return btn('Attack (bonus action)', 'swAttack');
-    if (id === 'moonbeam' && c.conc === id) return btn('Move (action)', 'moonbeamMove');
-    return btn('Cast', 'cast', id) + (sp.up ? btn('Upcast (level 2)', 'cast', id + '|lvl2', 'ghost') : '');
+    if (id === 'toll') return btn('Hurt', 'cast', 'toll|injured', 'xs') + btn('Unhurt', 'cast', 'toll', 'xs ghost');
+    if (id === 'spiritualWeapon' && c.conc === id) return btn('Attack', 'swAttack', null, 'xs');
+    if (id === 'moonbeam' && c.conc === id) return btn('Move', 'moonbeamMove', null, 'xs');
+    return btn('Cast', 'cast', id, 'xs') + (sp.up ? btn('L2', 'cast', id + '|lvl2', 'xs ghost', ' title="Upcast with a level 2 slot"') : '');
   }
-  function card(o) {
-    return `<article class="card spell ${o.cls} ${o.active ? 'active' : ''}">
-      <div class="sp-top"><span class="emoji">${o.emoji}</span><div class="sp-n"><b>${o.name}</b></div>${o.lvl ? `<span class="lvl">${o.lvl}</span>` : ''}</div>
-      <div class="badges"><span class="badge t-${o.time}">${APP.TIME_LABEL[o.time]}</span>${o.range ? `<span class="badge">${o.range}</span>` : ''}${o.conc ? '<span class="badge conc">Concentration</span>' : ''}</div>
-      <p>${o.wat}</p><div class="row wrap">${o.buttons}</div></article>`;
+  const TIME_SHORT = { action: 'Action', bonus: 'Bonus', reaction: 'Reaction', none: 'Free' };
+  function spRow(o) {
+    return `<div class="sprow ${o.active ? 'active' : ''}"><span class="emoji">${o.emoji}</span>
+      <div class="sp-main"><div class="sp-name"><b>${o.name}</b><span class="pill t-${o.time}">${TIME_SHORT[o.time]}</span>
+        ${o.range ? `<span class="rng">${o.range}</span>` : ''}${o.conc ? '<span class="pill conc">Conc.</span>' : ''}</div>
+        <small>${o.wat}</small></div>
+      <div class="sp-btns">${o.buttons}</div></div>`;
   }
   function viewSpells() {
     const c = C('pim');
+    const group = (g) => `<section class="card spgroup"><h3>${g[0]}</h3>${g[1].map((sid) => {
+      const sp = D.spells[sid];
+      return spRow({ active: c.conc === sid || (sid === 'sanctuary' && c.zone > 0), emoji: sp.emoji, name: sp.name,
+        time: sp.time, range: sp.range, conc: sp.conc, wat: sp.wat, buttons: spellButtons(sid) });
+    }).join('')}</section>`;
     return `<div class="card slim"><div class="resline"><span>Level 1: <b>${c.slots[1]}</b>/4</span><span>Level 2: <b>${c.slots[2]}</b>/3</span>
         <span>Channel Divinity: <b>${c.cd}</b>/2</span><span>Spell DC <b>14</b> · attack <b>+6</b></span></div></div>
-      ${D.spellGroups.map((g) => `<h2 class="grouph">${g[0]}</h2><div class="cards">${g[1].map((sid) => {
-        const sp = D.spells[sid];
-        return card({ cls: LVL_CLASS[sp.level], active: c.conc === sid || (sid === 'sanctuary' && c.zone > 0), emoji: sp.emoji, name: sp.name,
-          lvl: lvlLabel(sp.level), time: sp.time, range: sp.range, conc: sp.conc, wat: sp.wat, buttons: spellButtons(sid) });
-      }).join('')}</div>`).join('')}`;
+      <div class="grid"><div class="col">${D.spellGroups.slice(0, 3).map(group).join('')}</div>
+        <div class="col">${D.spellGroups.slice(3).map(group).join('')}</div></div>`;
   }
   function viewActies() {
     const c = C('charlie');
     return `<div class="card slim"><div class="resline"><span>Rage: <b>${c.rage}</b>/3</span><span>Attack <b>+6</b></span><span>Save DC <b>14</b></span>
         ${tog('Reckless', c.turn.reckless || c.turn.recklessUsed, 'turnToggle', 'reckless')}</div></div>
-      <div class="cards">${D.charlieActions.map((a) => card({ cls: 'lcd', active: a.id === 'rage' && c.raging, emoji: a.emoji, name: a.name,
-        time: a.time, wat: a.wat, buttons: btn(a.id === 'intimidate' ? 'Roll' : 'Do it', a.act[0], a.act[1]) })).join('')}</div>`;
+      <section class="card spgroup">${D.charlieActions.map((a) => spRow({ active: a.id === 'rage' && c.raging, emoji: a.emoji, name: a.name,
+        time: a.time, wat: a.wat, buttons: btn(a.id === 'intimidate' ? 'Roll' : 'Do it', a.act[0], a.act[1], 'xs') })).join('')}</section>`;
   }
 
   /* ---------- Dobbelstenen en regels ---------- */
