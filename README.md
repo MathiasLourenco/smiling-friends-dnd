@@ -11,12 +11,12 @@ D&D 2024-regels, level 4.
 
 ## Wat zit erin?
 
-- **Wat doe ik nu?**: stap-voor-stap hulp per beurt, afhankelijk van wat er gebeurt (iemand bijna neer, baas, ondoden…).
-- **Trackers**: HP, tijdelijke HP, spell slots, Channel Divinity, Rage, Lucky, Hit Dice. Alles wordt onthouden.
+- **Beurt-hulp**: per beurt alleen je actie en bonusactie, afhankelijk van wat er gebeurt (iemand bijna neer, humanoid-baas, ondoden).
+- **Trackers**: HP, temp HP, spell slots, Channel Divinity en Rage. Lucky, Hit Dice en de rest zitten achter "Meer". Alles wordt onthouden.
 - **Dobbelstenen met één klik**: aanvallen, spells, skills en saves met alle bonussen erbij (Rage, Frenzy, Bless, Savage Attacker…).
-- **Concentratie-hulp**: word je geraakt, dan gooit de app meteen je concentratie-save.
-- **Spellkaarten** in simpel Nederlands, met een Smiling Friends-naam per spell.
-- **Spiekbriefje** met de basisregels, en een **team-pagina** met combo's en rollenspel-tips.
+- **Concentratie**: word je geraakt, dan gooit de app meteen je concentratie-save.
+- **Spellkaarten** met de officiële namen (zodat de DM ze herkent) en één korte zin uitleg.
+- **Spiekbriefje** met de basisregels.
 - **Printbaar sheet** (knop 🖨️ Print), en kant-en-klare PDF's in [`sheets/`](sheets).
 - **Werkt offline**: na één keer openen werkt de app ook zonder wifi. Op een tablet kan je hem op het beginscherm zetten.
 

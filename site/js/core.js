@@ -34,7 +34,7 @@
   function freshState() {
     return { who: 'pim', tab: { pim: 'gevecht', charlie: 'gevecht' },
       chars: { pim: freshChar('pim'), charlie: freshChar('charlie') },
-      log: [], last: null, lastTest: null, resultOpen: true, amt: '',
+      log: [], last: null, lastTest: null, resultOpen: true, amt: '', more: { pim: false, charlie: false }, feat: false,
       tray: { n: 1, s: 20, mod: 0, mode: 0 } };
   }
   function merge(base, saved) {
@@ -90,7 +90,7 @@
     t.rolls = t.mode ? roll(2, 20) : roll(1, 20);
     t.extras = [];
     if (t.bless) t.extras.push({ label: 'Bless', val: rand(4) });
-    if (t.guidance) t.extras.push({ label: 'Je kan het!', val: rand(4) });
+    if (t.guidance) t.extras.push({ label: 'Guidance', val: rand(4) });
     APP.finishTest(t);
   };
   APP.finishTest = (t) => {
@@ -129,39 +129,33 @@
     check(t) {
       const lines = [];
       if (t.note) lines.push(t.note);
-      if (t.nat === 20) lines.push('🎉 Een natuurlijke 20!');
-      if (t.nat === 1) lines.push('😬 Een 1…');
-      lines.push('Zeg dit getal tegen de DM.');
+      if (t.nat === 20) lines.push('🎉 Natuurlijke 20!');
+      if (t.nat === 1) lines.push('😬 Natuurlijke 1.');
       APP.testShow(t, t.label, lines);
     },
     init(t) {
-      APP.testShow(t, '⚔️ Initiatief', ['Zeg dit getal tegen de DM. Die bepaalt wie wanneer aan de beurt is.',
-        'Is het jouw beurt? Volg dan de stappen bij "Wat doe ik nu?".']);
+      APP.testShow(t, '⚔️ Initiatief', []);
     },
     conc(t) {
       const c = C('pim');
       const pass = t.total >= t.dc;
       if (!pass && c.conc === t.concSpell) { APP.endConc(true); t.ended = true; }
       if (pass && t.ended && !c.conc) { APP.restoreConc(t.concSpell); t.ended = false; }
-      const name = D.spells[t.concSpell].sf;
-      const lines = (t.prefix || []).concat([
-        `Concentratie-save: DC ${t.dc} (met voordeel door War Caster).`,
-        pass ? `✔ Gelukt! ${name} blijft actief.` : `✘ Mislukt. ${name} is gestopt.`
-      ]);
-      APP.testShow(t, pass ? '🧠 Concentratie gehouden' : '🧠 Concentratie kwijt', lines);
+      const name = D.spells[t.concSpell].name;
+      const lines = (t.prefix || []).concat([pass ? `✔ ${name} blijft actief.` : `✘ ${name} is gestopt.`]);
+      APP.testShow(t, `Concentratie-save (DC ${t.dc})`, lines);
     },
     death(t) {
       const c = C(t.who);
       c.death = { s: t.before.s, f: t.before.f };
       c.hp = t.beforeHp;
       const lines = [];
-      if (t.nat === 20) { c.hp = 1; c.death = { s: 0, f: 0 }; lines.push('🎉 20! Je staat op met 1 HP.'); }
-      else if (t.nat === 1) { c.death.f += 2; lines.push('Een 1 telt als 2 mislukte death saves.'); }
-      else if (t.total >= 10) { c.death.s += 1; lines.push('✔ Gelukt (10 of hoger).'); }
-      else { c.death.f += 1; lines.push('✘ Mislukt (lager dan 10).'); }
-      if (c.death.s >= 3) lines.push('😮‍💨 3× gelukt: je bent stabiel. Je blijft bewusteloos, maar gaat niet dood.');
-      if (c.death.f >= 3) lines.push('💀 3× mislukt… Vraag de DM wat er gebeurt.');
-      if (c.hp === 0 && c.death.s < 3 && c.death.f < 3) lines.push(`Stand: ${c.death.s}× gelukt, ${c.death.f}× mislukt.`);
+      if (t.nat === 20) { c.hp = 1; c.death = { s: 0, f: 0 }; lines.push('🎉 Je staat op met 1 HP.'); }
+      else if (t.nat === 1) { c.death.f += 2; lines.push('✘✘ Telt dubbel.'); }
+      else if (t.total >= 10) { c.death.s += 1; lines.push('✔ Gelukt.'); }
+      else { c.death.f += 1; lines.push('✘ Mislukt.'); }
+      if (c.death.s >= 3) lines.push('Stabiel.');
+      if (c.death.f >= 3) lines.push('💀 Dood… vraag de DM.');
       APP.testShow(t, '💀 Death save', lines);
     },
     patk(t) {
@@ -170,11 +164,8 @@
       const r = roll(n, t.dmg.s);
       const total = sum(r) + t.dmg.bonus;
       const lines = [];
-      if (t.nat === 1) lines.push('Een 1: altijd mis.');
-      else if (crit) lines.push('💥 KRITIEK! Automatisch raak, dubbele dobbelstenen.');
-      else lines.push(`Raak als de AC van de vijand <b>${t.total} of lager</b> is. Vraag het de DM.`);
-      if (t.nat !== 1) lines.push(`Raak → <b>${total} ${t.dmg.type}</b> schade (${n}d${t.dmg.s}${t.dmg.bonus ? ' + ' + t.dmg.bonus : ''}: ${r.join(', ')}).`);
-      if (t.dmg.after) lines.push(t.dmg.after);
+      if (t.nat === 1) lines.push('Natuurlijke 1: mis.');
+      else lines.push(`${crit ? '💥 Kritiek! ' : ''}Raak: <b>${total} ${t.dmg.type}</b> (${n}d${t.dmg.s}${t.dmg.bonus ? ' + ' + t.dmg.bonus : ''}).`);
       APP.testShow(t, t.label, lines);
     }
   };
@@ -191,38 +182,36 @@
     let a = Math.max(0, Math.floor(amount));
     if (!a) return;
     const lines = [];
-    if (id === 'charlie' && c.raging && c.phys) { a = Math.floor(a / 2); lines.push(`Rage: halve schade → ${a}.`); }
+    if (id === 'charlie' && c.raging && c.phys) { a = Math.floor(a / 2); lines.push(`Rage: gehalveerd naar ${a}.`); }
     const taken = a;
     if (c.hp === 0) {
-      if (!taken) return APP.show({ who: id, title: 'Rage vangt alles op', big: '0', lines });
+      if (!taken) return APP.show({ who: id, title: 'Geen schade', big: '0', lines });
       c.death.f += 1;
-      lines.push('Je lag al op 0 HP: dat telt als 1 mislukte death save (2 bij een kritieke treffer).');
-      if (taken >= APP.maxHp(id)) lines.push('⚠️ Zoveel schade in één keer kan direct dood betekenen. Check met de DM.');
-      if (c.death.f >= 3) lines.push('💀 3× mislukt…');
+      lines.push('Op 0 HP: 1 mislukte death save (2 bij kritiek).');
+      if (taken >= APP.maxHp(id)) lines.push('⚠️ Kan direct dood zijn, vraag de DM.');
       return APP.show({ who: id, title: '💥 Geraakt op 0 HP', big: '−' + taken, lines });
     }
     const fromTemp = Math.min(c.temp, a);
     c.temp -= fromTemp; a -= fromTemp;
-    if (fromTemp) lines.push(`${fromTemp} schade ging van je tijdelijke HP af.`);
+    if (fromTemp) lines.push(`${fromTemp} van je temp HP.`);
     c.hp -= a;
     let down = false;
     if (c.hp <= 0) {
       const over = -c.hp;
       c.hp = 0; down = true; c.death = { s: 0, f: 0 };
-      if (over >= APP.maxHp(id)) lines.push('⚠️ De schade die over is, is minstens je max HP. Volgens de regels ben je dan meteen dood. Check met de DM.');
-      else lines.push('😵 Je ligt op 0 HP en bent bewusteloos. Gooi elke beurt een death save.');
+      lines.push(over >= APP.maxHp(id) ? '⚠️ Zoveel schade kan direct dood betekenen, vraag de DM.' : '😵 0 HP: gooi elke beurt een death save.');
       if (id === 'pim') {
-        if (c.conc) { lines.push(`Je concentratie op ${D.spells[c.conc].sf} stopt.`); APP.endConc(true); }
-        if (c.zone) { c.zone = 0; lines.push('De Smile Zone verdwijnt.'); }
+        if (c.conc) { lines.push(`${D.spells[c.conc].name} stopt.`); APP.endConc(true); }
+        if (c.zone) { c.zone = 0; lines.push('Twilight Sanctuary stopt.'); }
       }
-      if (id === 'charlie' && c.raging) { c.raging = false; lines.push('Je Rage stopt.'); }
+      if (id === 'charlie' && c.raging) { c.raging = false; lines.push('Rage stopt.'); }
     }
     if (!down && id === 'pim' && c.conc && taken > 0) {
       const dc = Math.min(30, Math.max(10, Math.floor(taken / 2)));
-      lines.unshift(`💥 −${taken} HP → nog ${c.hp}/${APP.maxHp(id)}.`);
+      lines.unshift(`−${taken} HP, nog ${c.hp}/${APP.maxHp(id)}.`);
       return APP.runTest({ who: 'pim', kind: 'conc', mod: APP.saveMod('pim', 'CON'), mode: 1, bless: c.blessed, dc, concSpell: c.conc, prefix: lines });
     }
-    APP.show({ who: id, title: `💥 ${DC(id).short} wordt geraakt`, big: '−' + taken, sub: `nog ${c.hp}/${APP.maxHp(id)} HP`, lines });
+    APP.show({ who: id, title: `💥 Schade`, big: '−' + taken, sub: `nog ${c.hp}/${APP.maxHp(id)} HP`, lines });
   };
 
   /* Concentratie (alleen Pim) */
@@ -233,7 +222,7 @@
     if (id === 'bless') { C('pim').blessed = false; C('charlie').blessed = false; }
     if (id === 'holdPerson') C('charlie').situ.paralyzed = false;
     if (id === 'guidance') c.guidance = false;
-    if (!silent) APP.note('🧠 Concentratie gestopt', [`${D.spells[id].emoji} ${D.spells[id].sf} is voorbij.`], { who: 'pim' });
+    if (!silent) APP.note(`${D.spells[id].name} gestopt`, [], { who: 'pim' });
   };
   APP.restoreConc = (id) => {
     const c = C('pim');

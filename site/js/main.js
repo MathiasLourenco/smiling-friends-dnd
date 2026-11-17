@@ -19,19 +19,21 @@
     who: (a) => { APP.st.who = a; },
     tab: (a, who) => { APP.st.tab[who] = a; window.scrollTo(0, 0); },
     amt: (a) => { APP.st.amt = String(Math.max(0, amt() + Number(a))); },
-    dmg: (a, who) => { if (!amt()) return APP.note('Hoeveel?', ['Vul eerst in hoeveel schade je krijgt.'], { who }); APP.takeDamage(who, amt()); APP.st.amt = ''; },
+    dmg: (a, who) => { if (!amt()) return APP.note('Vul eerst een getal in', [], { who }); APP.takeDamage(who, amt()); APP.st.amt = ''; },
     heal: (a, who) => {
       const v = amt();
-      if (!v) return APP.note('Hoeveel?', ['Vul eerst in hoeveel HP je terugkrijgt.'], { who });
-      const woke = APP.heal(who, v);
+      if (!v) return APP.note('Vul eerst een getal in', [], { who });
+      APP.heal(who, v);
       APP.st.amt = '';
-      APP.note('💚 Geheeld', [`+${v} HP → ${C(who).hp}/${APP.maxHp(who)}.`].concat(woke ? ['Je staat weer op!'] : []), { who, big: '+' + v });
+      APP.note('💚 Heal', [], { who, big: '+' + v, sub: `nu ${C(who).hp}/${APP.maxHp(who)} HP` });
     },
     temp: (a, who) => {
       const v = amt();
       C(who).temp = v; APP.st.amt = '';
-      APP.note('🛡️ Tijdelijke HP', [v ? `Je hebt nu ${v} tijdelijke HP. Die gaan er eerst af.` : 'Tijdelijke HP op 0 gezet.'], { who, big: v });
+      APP.note('Temp HP', [], { who, big: v });
     },
+    more: (a, who) => { APP.st.more[who] = !APP.st.more[who]; },
+    feat: () => { APP.st.feat = !APP.st.feat; },
     flag: (a, who) => { const c = C(who); c[a] = !c[a]; },
     aid: (a, who) => {
       const c = C(who);
@@ -48,9 +50,9 @@
     pip: (a, who) => APP.pip(who, a),
     luckyDis: () => {
       const c = C('pim');
-      if (c.lucky <= 0) return APP.note('Geen Lucky meer', ['Na een long rest krijg je ze terug.'], { who: 'pim' });
+      if (c.lucky <= 0) return APP.note('Geen Lucky meer', [], { who: 'pim' });
       c.lucky--;
-      APP.note('🍀 Lucky', ['De vijand die jou aanvalt gooit met <b>nadeel</b>. Zeg het tegen de DM.'], { who: 'pim' });
+      APP.note('🍀 Lucky', ['Aanval tegen jou met nadeel.'], { who: 'pim' });
     },
     stopConc: () => APP.endConc(false),
     zoneTemp: (a) => APP.zoneTemp(a),
@@ -63,12 +65,12 @@
     moonbeamMove: () => APP.moonbeamMove(),
     giveHeal: (a) => {
       const p = a.split(':'), id = p[0], v = Number(p[1]);
-      const woke = APP.heal(id, v);
-      APP.note(`💚 ${APP.DC(id).short} +${v} HP`, [`Nu ${C(id).hp}/${APP.maxHp(id)} HP.`].concat(woke ? ['Hij staat weer op!'] : []), { who: 'pim', big: '+' + v });
+      APP.heal(id, v);
+      APP.note(`💚 ${APP.DC(id).short}`, [], { who: 'pim', big: '+' + v, sub: `nu ${C(id).hp}/${APP.maxHp(id)} HP` });
     },
-    vbGive: (a) => { C(a).vb = true; APP.note('⏰ Wakker worden!', [`${APP.DC(a).short} gooit zijn volgende initiatief met voordeel.`], { who: 'pim' }); },
-    holdFail: () => { C('charlie').situ.paralyzed = true; APP.note('🧊 Verlamd!', ['Charlie: ga ernaast staan. Elke raak = automatisch kritiek.', 'Het doelwit mag aan het eind van elke beurt opnieuw een WIS-save doen.'], { who: 'pim' }); },
-    holdPass: () => { APP.endConc(true); APP.note('😑 Gehaald', ['Freeze-frame werkte niet. Je slot is wel op, en je concentratie is weer vrij.'], { who: 'pim' }); },
+    vbGive: (a) => { C(a).vb = true; APP.note('⏰ Vigilant Blessing', [`${APP.DC(a).short}: voordeel op initiatief.`], { who: 'pim' }); },
+    holdFail: () => { C('charlie').situ.paralyzed = true; APP.note('🧊 Paralyzed', ['Charlie ernaast: raak = kritiek.'], { who: 'pim' }); },
+    holdPass: () => { APP.endConc(true); APP.st.resultOpen = false; },
     rage: () => APP.rage(),
     rageToggle: () => { if (C('charlie').raging) APP.stopRage(); else APP.rage(); },
     stopRage: () => APP.stopRage(),

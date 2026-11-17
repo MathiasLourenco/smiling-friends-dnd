@@ -91,6 +91,10 @@ svg { display: block; }
 .badge.t-bonus { background: var(--pim-l); }
 .badge.t-reaction { background: #d6f0ff; }
 .hint { background: var(--accent-l); border: 2px dashed var(--ink); border-radius: 12px; padding: 8px 12px; font-size: .9rem; }
+.tipline { margin: 12px 0 0; font-weight: 600; color: var(--muted); }
+.tipline .btn { margin-left: 8px; }
+.fold { display: none; margin-top: 14px; }
+.fold.open { display: block; }
 
 /* ---------- Beurt-hulp ---------- */
 .turn { background: var(--accent-l); }
@@ -253,6 +257,7 @@ svg { display: block; }
   @page { margin: 12mm; }
   body { background: #fff; padding: 0; font-size: 11pt; }
   .top, .tabs, #result, .noprint { display: none !important; }
+  .fold { display: block !important; }
   .card { box-shadow: none; border-width: 2px; break-inside: avoid; }
   .abox, .skill { box-shadow: none; }
   .abil { grid-template-columns: repeat(6, 1fr); }
