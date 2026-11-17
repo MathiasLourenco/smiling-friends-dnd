@@ -13,12 +13,12 @@
   };
   APP.newTurn = (id) => {
     const c = C(id), lines = [];
-    if (id === 'charlie' && c.raging && !c.turn.kept) { c.raging = false; lines.push('Rage gestopt: je viel vorige beurt niet aan.'); }
+    if (id === 'charlie' && c.raging && !c.turn.kept) { c.raging = false; lines.push('Rage ended: no attack last turn.'); }
     if (id === 'charlie' && c.pending) c.pending = null;
     c.turn = APP.freshTurn();
     c.round++;
-    if (id === 'pim' && c.zone > 0) { c.zone--; if (c.zone === 0) lines.push('Twilight Sanctuary is voorbij.'); }
-    if (lines.length) APP.note(`Ronde ${c.round}`, lines, { who: id });
+    if (id === 'pim' && c.zone > 0) { c.zone--; if (c.zone === 0) lines.push('Twilight Sanctuary has ended.'); }
+    if (lines.length) APP.note(`Round ${c.round}`, lines, { who: id });
     else APP.st.resultOpen = false;
   };
   APP.endCombat = (id) => {
@@ -35,20 +35,20 @@
     const c = C(id);
     if (id === 'pim') c.cd = Math.min(2, c.cd + 1);
     else c.rage = Math.min(3, c.rage + 1);
-    APP.note('☕ Short rest', [id === 'pim' ? '+1 Channel Divinity.' : '+1 Rage.'], { who: id, buttons: c.hitDice > 0 ? [{ label: `Hit Die gebruiken (${c.hitDice} over)`, act: 'hitDie' }] : [] });
+    APP.note('☕ Short rest', [id === 'pim' ? '+1 Channel Divinity.' : '+1 Rage.'], { who: id, buttons: c.hitDice > 0 ? [{ label: `Spend Hit Die (${c.hitDice} left)`, act: 'hitDie' }] : [] });
   };
   APP.hitDie = (id) => {
     const c = C(id), d = DC(id);
-    if (c.hitDice <= 0) return APP.note('Geen Hit Dice meer', [], { who: id });
-    if (c.hp >= APP.maxHp(id)) return APP.note('HP is al vol', [], { who: id });
+    if (c.hitDice <= 0) return APP.note('No Hit Dice left', [], { who: id });
+    if (c.hp >= APP.maxHp(id)) return APP.note('HP already full', [], { who: id });
     c.hitDice--;
     const r = roll(1, d.hitDie)[0], amt = r + APP.abMod(id, 'CON');
     APP.heal(id, amt);
-    APP.show({ who: id, title: '🎲 Hit Die', big: '+' + amt, sub: `d${d.hitDie} + 3 · nu ${c.hp}/${APP.maxHp(id)} HP`,
-      buttons: c.hitDice > 0 && c.hp < APP.maxHp(id) ? [{ label: `Nog een (${c.hitDice} over)`, act: 'hitDie' }] : [] });
+    APP.show({ who: id, title: '🎲 Hit Die', big: '+' + amt, sub: `d${d.hitDie} + 3 · now ${c.hp}/${APP.maxHp(id)} HP`,
+      buttons: c.hitDice > 0 && c.hp < APP.maxHp(id) ? [{ label: `Another (${c.hitDice} left)`, act: 'hitDie' }] : [] });
   };
   APP.longRest = (id) => {
-    if (!ask('Long rest: alles terug op vol?')) return;
+    if (!ask('Long rest: restore everything?')) return;
     const c = C(id);
     if (id === 'pim' && c.conc) APP.endConc(true);
     Object.assign(c, { aid: false, temp: 0, heroic: true, hitDice: DC(id).level, death: { s: 0, f: 0 }, inCombat: false,
@@ -56,7 +56,7 @@
     c.hp = APP.maxHp(id);
     if (id === 'pim') Object.assign(c, { slots: { 1: 4, 2: 3 }, cd: 2, lucky: 2, eyes: 1, zone: 0 });
     else Object.assign(c, { rage: 3, raging: false });
-    APP.note('🛌 Long rest', ['Alles is terug.'], { who: id, buttons: id === 'pim' ? [{ label: 'Cast Aid', act: 'cast', arg: 'aid' }] : [] });
+    APP.note('🛌 Long rest', ['Everything restored.'], { who: id, buttons: id === 'pim' ? [{ label: 'Cast Aid', act: 'cast', arg: 'aid' }] : [] });
   };
 
   APP.rollSkill = (id, name) => {
@@ -64,26 +64,26 @@
     let m = APP.skillMod(id, name), ab = sk[1], note = '';
     if (id === 'charlie' && c.raging && d.rageStrSkills.includes(name)) {
       const strM = APP.abMod(id, 'STR') + (d.skillProf.includes(name) ? d.prof : 0);
-      if (strM >= m) { m = strM; ab = 'STR'; note = 'Rage: met STR en voordeel.'; }
+      if (strM >= m) { m = strM; ab = 'STR'; note = 'Rage: using STR, with advantage.'; }
     }
     const adv = id === 'charlie' && c.raging && ab === 'STR';
     const dis = id === 'pim' && name === 'Stealth';
-    if (dis) note = 'Chain mail: nadeel.';
+    if (dis) note = 'Chain mail: disadvantage.';
     const mode = APP.combine(c.mode, adv, dis);
     APP.runTest({ who: id, kind: 'check', label: name, mod: m, mode, guidance: id === 'pim' && c.guidance, note });
   };
   APP.rollSave = (id, ab) => {
     const c = C(id);
     let adv = false, note = '';
-    if (id === 'charlie' && c.raging && ab === 'STR') { adv = true; note = 'Rage: voordeel.'; }
-    if (id === 'charlie' && ab === 'DEX') { adv = true; note = 'Danger Sense: voordeel.'; }
+    if (id === 'charlie' && c.raging && ab === 'STR') { adv = true; note = 'Rage: advantage.'; }
+    if (id === 'charlie' && ab === 'DEX') { adv = true; note = 'Danger Sense: advantage.'; }
     const mode = APP.combine(c.mode, adv, false);
     APP.runTest({ who: id, kind: 'check', label: `${ab} save`, mod: APP.saveMod(id, ab), mode, bless: c.blessed, note });
   };
   APP.deathSave = (id) => {
     const c = C(id);
-    if (c.hp > 0) return APP.note('Je staat nog', [], { who: id });
-    if (c.death.s >= 3 || c.death.f >= 3) return APP.note(c.death.s >= 3 ? 'Je bent stabiel' : 'Vraag de DM', [], { who: id });
+    if (c.hp > 0) return APP.note('You are still standing', [], { who: id });
+    if (c.death.s >= 3 || c.death.f >= 3) return APP.note(c.death.s >= 3 ? 'You are stable' : 'Ask the DM', [], { who: id });
     APP.runTest({ who: id, kind: 'death', mod: 0, mode: 0, bless: c.blessed, before: { s: c.death.s, f: c.death.f }, beforeHp: c.hp });
   };
 
@@ -91,8 +91,8 @@
     const c = C(target), r = roll(1, 6)[0] + 4;
     const kept = r <= c.temp;
     if (!kept) c.temp = r;
-    APP.show({ who: 'pim', title: `🌅 Temp HP voor ${DC(target).short}`, big: r, sub: '1d6 + 4',
-      lines: kept ? [`Had al ${c.temp}, dat blijft (stapelt niet).`] : [] });
+    APP.show({ who: 'pim', title: `🌅 Temp HP for ${DC(target).short}`, big: r, sub: '1d6 + 4',
+      lines: kept ? [`Already had ${c.temp}, keeping that (doesn't stack).`] : [] });
   };
 
   const RES = {

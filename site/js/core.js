@@ -102,11 +102,11 @@
   APP.testShow = (t, title, lines, buttons) => {
     const c = C(t.who);
     const dice = t.rolls.length > 1
-      ? `d20: ${t.rolls.join(' & ')} → ${t.nat} (${t.mode > 0 ? 'voordeel' : 'nadeel'})`
+      ? `d20: ${t.rolls.join(' & ')} → ${t.nat} (${t.mode > 0 ? 'advantage' : 'disadvantage'})`
       : `d20: ${t.nat}`;
     const extras = t.extras.map((e) => ` + ${e.label} ${e.val}`).join('');
     const btns = (buttons || []).slice();
-    if (c.heroic && !t.usedHeroic) btns.push({ label: '🌟 Heroic Inspiration: opnieuw', act: 'heroic', cls: 'ghost' });
+    if (c.heroic && !t.usedHeroic) btns.push({ label: '🌟 Heroic Inspiration: reroll', act: 'heroic', cls: 'ghost' });
     if (t.who === 'pim' && c.lucky > 0 && t.mode < 1 && !t.usedLucky) btns.push({ label: '🍀 Lucky: extra d20', act: 'lucky', cls: 'ghost' });
     APP.show({ who: t.who, title, big: t.total, sub: `${dice} ${sign(t.mod)}${extras}`, lines, buttons: btns, nat: t.nat });
   };
@@ -129,12 +129,12 @@
     check(t) {
       const lines = [];
       if (t.note) lines.push(t.note);
-      if (t.nat === 20) lines.push('🎉 Natuurlijke 20!');
-      if (t.nat === 1) lines.push('😬 Natuurlijke 1.');
+      if (t.nat === 20) lines.push('🎉 Natural 20!');
+      if (t.nat === 1) lines.push('😬 Natural 1.');
       APP.testShow(t, t.label, lines);
     },
     init(t) {
-      APP.testShow(t, '⚔️ Initiatief', []);
+      APP.testShow(t, '⚔️ Initiative', []);
     },
     conc(t) {
       const c = C('pim');
@@ -142,20 +142,20 @@
       if (!pass && c.conc === t.concSpell) { APP.endConc(true); t.ended = true; }
       if (pass && t.ended && !c.conc) { APP.restoreConc(t.concSpell); t.ended = false; }
       const name = D.spells[t.concSpell].name;
-      const lines = (t.prefix || []).concat([pass ? `✔ ${name} blijft actief.` : `✘ ${name} is gestopt.`]);
-      APP.testShow(t, `Concentratie-save (DC ${t.dc})`, lines);
+      const lines = (t.prefix || []).concat([pass ? `✔ ${name} holds.` : `✘ ${name} ends.`]);
+      APP.testShow(t, `Concentration save (DC ${t.dc})`, lines);
     },
     death(t) {
       const c = C(t.who);
       c.death = { s: t.before.s, f: t.before.f };
       c.hp = t.beforeHp;
       const lines = [];
-      if (t.nat === 20) { c.hp = 1; c.death = { s: 0, f: 0 }; lines.push('🎉 Je staat op met 1 HP.'); }
-      else if (t.nat === 1) { c.death.f += 2; lines.push('✘✘ Telt dubbel.'); }
-      else if (t.total >= 10) { c.death.s += 1; lines.push('✔ Gelukt.'); }
-      else { c.death.f += 1; lines.push('✘ Mislukt.'); }
-      if (c.death.s >= 3) lines.push('Stabiel.');
-      if (c.death.f >= 3) lines.push('💀 Dood… vraag de DM.');
+      if (t.nat === 20) { c.hp = 1; c.death = { s: 0, f: 0 }; lines.push('🎉 You get up with 1 HP.'); }
+      else if (t.nat === 1) { c.death.f += 2; lines.push('✘✘ Counts as two failures.'); }
+      else if (t.total >= 10) { c.death.s += 1; lines.push('✔ Success.'); }
+      else { c.death.f += 1; lines.push('✘ Failure.'); }
+      if (c.death.s >= 3) lines.push('Stable.');
+      if (c.death.f >= 3) lines.push('💀 Dead… ask the DM.');
       APP.testShow(t, '💀 Death save', lines);
     },
     patk(t) {
@@ -164,8 +164,8 @@
       const r = roll(n, t.dmg.s);
       const total = sum(r) + t.dmg.bonus;
       const lines = [];
-      if (t.nat === 1) lines.push('Natuurlijke 1: mis.');
-      else lines.push(`${crit ? '💥 Kritiek! ' : ''}Raak: <b>${total} ${t.dmg.type}</b> (${n}d${t.dmg.s}${t.dmg.bonus ? ' + ' + t.dmg.bonus : ''}).`);
+      if (t.nat === 1) lines.push('Natural 1: miss.');
+      else lines.push(`${crit ? '💥 Crit! ' : ''}Hit: <b>${total} ${t.dmg.type}</b> (${n}d${t.dmg.s}${t.dmg.bonus ? ' + ' + t.dmg.bonus : ''}).`);
       APP.testShow(t, t.label, lines);
     }
   };
@@ -182,36 +182,36 @@
     let a = Math.max(0, Math.floor(amount));
     if (!a) return;
     const lines = [];
-    if (id === 'charlie' && c.raging && c.phys) { a = Math.floor(a / 2); lines.push(`Rage: gehalveerd naar ${a}.`); }
+    if (id === 'charlie' && c.raging && c.phys) { a = Math.floor(a / 2); lines.push(`Rage: halved to ${a}.`); }
     const taken = a;
     if (c.hp === 0) {
-      if (!taken) return APP.show({ who: id, title: 'Geen schade', big: '0', lines });
+      if (!taken) return APP.show({ who: id, title: 'No damage', big: '0', lines });
       c.death.f += 1;
-      lines.push('Op 0 HP: 1 mislukte death save (2 bij kritiek).');
-      if (taken >= APP.maxHp(id)) lines.push('⚠️ Kan direct dood zijn, vraag de DM.');
-      return APP.show({ who: id, title: '💥 Geraakt op 0 HP', big: '−' + taken, lines });
+      lines.push('At 0 HP: 1 failed death save (2 on a crit).');
+      if (taken >= APP.maxHp(id)) lines.push('⚠️ This may kill you outright, ask the DM.');
+      return APP.show({ who: id, title: '💥 Hit at 0 HP', big: '−' + taken, lines });
     }
     const fromTemp = Math.min(c.temp, a);
     c.temp -= fromTemp; a -= fromTemp;
-    if (fromTemp) lines.push(`${fromTemp} van je temp HP.`);
+    if (fromTemp) lines.push(`${fromTemp} from temp HP.`);
     c.hp -= a;
     let down = false;
     if (c.hp <= 0) {
       const over = -c.hp;
       c.hp = 0; down = true; c.death = { s: 0, f: 0 };
-      lines.push(over >= APP.maxHp(id) ? '⚠️ Zoveel schade kan direct dood betekenen, vraag de DM.' : '😵 0 HP: gooi elke beurt een death save.');
+      lines.push(over >= APP.maxHp(id) ? '⚠️ This may kill you outright, ask the DM.' : '😵 0 HP: roll a death save each turn.');
       if (id === 'pim') {
-        if (c.conc) { lines.push(`${D.spells[c.conc].name} stopt.`); APP.endConc(true); }
-        if (c.zone) { c.zone = 0; lines.push('Twilight Sanctuary stopt.'); }
+        if (c.conc) { lines.push(`${D.spells[c.conc].name} ends.`); APP.endConc(true); }
+        if (c.zone) { c.zone = 0; lines.push('Twilight Sanctuary ends.'); }
       }
-      if (id === 'charlie' && c.raging) { c.raging = false; lines.push('Rage stopt.'); }
+      if (id === 'charlie' && c.raging) { c.raging = false; lines.push('Rage ends.'); }
     }
     if (!down && id === 'pim' && c.conc && taken > 0) {
       const dc = Math.min(30, Math.max(10, Math.floor(taken / 2)));
-      lines.unshift(`−${taken} HP, nog ${c.hp}/${APP.maxHp(id)}.`);
+      lines.unshift(`−${taken} HP, ${c.hp}/${APP.maxHp(id)} left.`);
       return APP.runTest({ who: 'pim', kind: 'conc', mod: APP.saveMod('pim', 'CON'), mode: 1, bless: c.blessed, dc, concSpell: c.conc, prefix: lines });
     }
-    APP.show({ who: id, title: `💥 Schade`, big: '−' + taken, sub: `nog ${c.hp}/${APP.maxHp(id)} HP`, lines });
+    APP.show({ who: id, title: `💥 Damage`, big: '−' + taken, sub: `${c.hp}/${APP.maxHp(id)} HP left`, lines });
   };
 
   /* Concentratie (alleen Pim) */
@@ -222,7 +222,7 @@
     if (id === 'bless') { C('pim').blessed = false; C('charlie').blessed = false; }
     if (id === 'holdPerson') C('charlie').situ.paralyzed = false;
     if (id === 'guidance') c.guidance = false;
-    if (!silent) APP.note(`${D.spells[id].name} gestopt`, [], { who: 'pim' });
+    if (!silent) APP.note(`${D.spells[id].name} ended`, [], { who: 'pim' });
   };
   APP.restoreConc = (id) => {
     const c = C('pim');

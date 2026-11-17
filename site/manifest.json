@@ -1,8 +1,8 @@
 {
   "name": "Smiling Friends D&D — Pim & Charlie",
   "short_name": "SF D&D",
-  "description": "Character sheets en beurt-hulp voor Pim en Charlie (D&D 2024, level 4).",
-  "lang": "nl",
+  "description": "Character sheets and turn helper for Pim and Charlie (D&D 2024, level 4).",
+  "lang": "en",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

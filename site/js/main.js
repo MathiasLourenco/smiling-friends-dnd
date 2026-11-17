@@ -19,13 +19,13 @@
     who: (a) => { APP.st.who = a; },
     tab: (a, who) => { APP.st.tab[who] = a; window.scrollTo(0, 0); },
     amt: (a) => { APP.st.amt = String(Math.max(0, amt() + Number(a))); },
-    dmg: (a, who) => { if (!amt()) return APP.note('Vul eerst een getal in', [], { who }); APP.takeDamage(who, amt()); APP.st.amt = ''; },
+    dmg: (a, who) => { if (!amt()) return APP.note('Enter a number first', [], { who }); APP.takeDamage(who, amt()); APP.st.amt = ''; },
     heal: (a, who) => {
       const v = amt();
-      if (!v) return APP.note('Vul eerst een getal in', [], { who });
+      if (!v) return APP.note('Enter a number first', [], { who });
       APP.heal(who, v);
       APP.st.amt = '';
-      APP.note('💚 Heal', [], { who, big: '+' + v, sub: `nu ${C(who).hp}/${APP.maxHp(who)} HP` });
+      APP.note('💚 Heal', [], { who, big: '+' + v, sub: `now ${C(who).hp}/${APP.maxHp(who)} HP` });
     },
     temp: (a, who) => {
       const v = amt();
@@ -50,9 +50,9 @@
     pip: (a, who) => APP.pip(who, a),
     luckyDis: () => {
       const c = C('pim');
-      if (c.lucky <= 0) return APP.note('Geen Lucky meer', [], { who: 'pim' });
+      if (c.lucky <= 0) return APP.note('No Lucky left', [], { who: 'pim' });
       c.lucky--;
-      APP.note('🍀 Lucky', ['Aanval tegen jou met nadeel.'], { who: 'pim' });
+      APP.note('🍀 Lucky', ['The attack against you has disadvantage.'], { who: 'pim' });
     },
     stopConc: () => APP.endConc(false),
     zoneTemp: (a) => APP.zoneTemp(a),
@@ -66,10 +66,10 @@
     giveHeal: (a) => {
       const p = a.split(':'), id = p[0], v = Number(p[1]);
       APP.heal(id, v);
-      APP.note(`💚 ${APP.DC(id).short}`, [], { who: 'pim', big: '+' + v, sub: `nu ${C(id).hp}/${APP.maxHp(id)} HP` });
+      APP.note(`💚 ${APP.DC(id).short}`, [], { who: 'pim', big: '+' + v, sub: `now ${C(id).hp}/${APP.maxHp(id)} HP` });
     },
-    vbGive: (a) => { C(a).vb = true; APP.note('⏰ Vigilant Blessing', [`${APP.DC(a).short}: voordeel op initiatief.`], { who: 'pim' }); },
-    holdFail: () => { C('charlie').situ.paralyzed = true; APP.note('🧊 Paralyzed', ['Charlie ernaast: raak = kritiek.'], { who: 'pim' }); },
+    vbGive: (a) => { C(a).vb = true; APP.note('⏰ Vigilant Blessing', [`${APP.DC(a).short}: advantage on initiative.`], { who: 'pim' }); },
+    holdFail: () => { C('charlie').situ.paralyzed = true; APP.note('🧊 Paralyzed', ['Charlie next to it: every hit is a crit.'], { who: 'pim' }); },
     holdPass: () => { APP.endConc(true); APP.st.resultOpen = false; },
     rage: () => APP.rage(),
     rageToggle: () => { if (C('charlie').raging) APP.stopRage(); else APP.rage(); },
@@ -100,7 +100,7 @@
     closeResult: () => { APP.st.resultOpen = false; },
     openResult: () => { APP.st.resultOpen = true; },
     print: (a, who) => { APP.st.tab[who] = 'sheet'; setTimeout(() => window.print(), 50); },
-    resetAll: () => { if (APP.ask('Alles terugzetten naar het begin? Je HP, slots en logboek worden gewist.')) APP.reset(); }
+    resetAll: () => { if (APP.ask('Reset everything? HP, slots and the roll log will be cleared.')) APP.reset(); }
   };
 
   document.addEventListener('click', (e) => {

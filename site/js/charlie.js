@@ -6,21 +6,21 @@
 
   APP.rage = () => {
     const c = C('charlie');
-    if (c.hp === 0) return APP.note('Je ligt op 0 HP', ['Je kan niks doen. Gooi een death save.'], { who: 'charlie' });
-    if (c.raging) return APP.note('Je bent al in Rage', ['Val elke beurt aan, dan blijft hij aan.'], { who: 'charlie' });
-    if (c.rage <= 0) return APP.note('Geen Rage meer', ['Na een short rest krijg je er 1 terug.'], { who: 'charlie' });
-    if (c.inCombat && c.turn.bonus && !ask('Je bonusactie is deze beurt al gebruikt. Toch doen?')) return;
+    if (c.hp === 0) return APP.note('You are at 0 HP', ['Roll a death save.'], { who: 'charlie' });
+    if (c.raging) return APP.note('Already raging', ['Attack every turn to keep it going.'], { who: 'charlie' });
+    if (c.rage <= 0) return APP.note('No Rage left', ['You regain 1 on a short rest.'], { who: 'charlie' });
+    if (c.inCombat && c.turn.bonus && !ask('Bonus action already used. Do it anyway?')) return;
     c.rage--; c.raging = true; c.turn.kept = true;
     if (c.inCombat) c.turn.bonus = true;
-    APP.note('😤 Rage', ['Halve wapenschade, +2 schade, voordeel op STR.'], { who: 'charlie' });
+    APP.note('😤 Rage', ['Resist weapon damage, +2 damage, advantage on STR.'], { who: 'charlie' });
   };
-  APP.stopRage = () => { C('charlie').raging = false; APP.note('Rage gestopt', [], { who: 'charlie' }); };
+  APP.stopRage = () => { C('charlie').raging = false; APP.note('Rage ended', [], { who: 'charlie' }); };
   APP.extendRage = () => {
     const c = C('charlie');
     if (!c.raging) return;
-    if (c.turn.bonus && !ask('Je bonusactie is deze beurt al gebruikt. Toch doen?')) return;
+    if (c.turn.bonus && !ask('Bonus action already used. Do it anyway?')) return;
     c.turn.bonus = true; c.turn.kept = true;
-    APP.note('😤 Rage verlengd', [], { who: 'charlie' });
+    APP.note('😤 Rage extended', [], { who: 'charlie' });
   };
 
   function damage(wid, crit, o) {
@@ -32,7 +32,7 @@
       const r2 = roll(n, w.s);
       savage = true;
       if (sum(r2) > sum(r)) r = r2;
-      parts.push([`${n}d${w.s} (Savage: beste van 2)`, sum(r)]);
+      parts.push([`${n}d${w.s} (Savage: best of 2)`, sum(r)]);
     } else parts.push([`${n}d${w.s}`, sum(r)]);
     if (!o.cleave) parts.push(['STR', 4]);
     if (c.raging) parts.push(['Rage', 2]);
@@ -48,15 +48,15 @@
   APP.attack = (wid, o) => {
     o = o || {};
     const c = C('charlie');
-    if (c.hp === 0) return APP.note('Je ligt op 0 HP', ['Je kan niks doen. Gooi een death save.'], { who: 'charlie' });
+    if (c.hp === 0) return APP.note('You are at 0 HP', ['Roll a death save.'], { who: 'charlie' });
     if (c.inCombat) {
       if (o.hew) {
-        if (c.turn.bonus && !ask('Je bonusactie is deze beurt al gebruikt. Toch doen?')) return;
+        if (c.turn.bonus && !ask('Bonus action already used. Do it anyway?')) return;
         c.turn.bonus = true;
       } else if (o.cleave) {
         c.turn.cleave = true;
       } else {
-        if (c.turn.action && !ask('Je hebt deze beurt al aangevallen (op level 4 is dat 1 aanval per beurt). Toch doen?')) return;
+        if (c.turn.action && !ask('You already attacked this turn (1 attack per turn at level 4). Do it anyway?')) return;
         c.turn.action = true;
       }
     }
@@ -64,7 +64,7 @@
     if (c.turn.reckless || c.turn.recklessUsed) { c.turn.recklessUsed = true; mode = 1; }
     if (c.raging) c.turn.kept = true;
     const w = D.weapons[wid];
-    const label = `${w.emoji} ${o.cleave ? 'Cleave' : o.hew ? 'Hew' : w.name}${mode === 1 ? ' (voordeel)' : ''}`;
+    const label = `${w.emoji} ${o.cleave ? 'Cleave' : o.hew ? 'Hew' : w.name}${mode === 1 ? ' (advantage)' : ''}`;
     APP.runTest({ who: 'charlie', kind: 'catk', label, mod: 6, mode, bless: c.blessed, wid, o });
   };
 
@@ -75,11 +75,11 @@
     const dmg = damage(t.wid, crit, t.o);
     c.pending = { wid: t.wid, o: t.o, dmg, crit };
     const lines = [];
-    if (t.nat === 1) lines.push('Natuurlijke 1: mis.');
-    else lines.push(`${crit ? '💥 Kritiek! ' : ''}Raak: <b>${dmg.total} ${w.type}</b> <small>(${dmg.parts.map((p) => p[0] + ' ' + p[1]).join(' + ')})</small>`);
+    if (t.nat === 1) lines.push('Natural 1: miss.');
+    else lines.push(`${crit ? '💥 Crit! ' : ''}Hit: <b>${dmg.total} ${w.type}</b> <small>(${dmg.parts.map((p) => p[0] + ' ' + p[1]).join(' + ')})</small>`);
     const buttons = t.nat === 1
-      ? [{ label: 'Mis', act: 'miss' }]
-      : [{ label: '✔ Raak', act: 'hit', cls: 'ok' }, { label: '✘ Mis', act: 'miss', cls: 'bad' }];
+      ? [{ label: 'Miss', act: 'miss' }]
+      : [{ label: '✔ Hit', act: 'hit', cls: 'ok' }, { label: '✘ Miss', act: 'miss', cls: 'bad' }];
     APP.testShow(t, t.label, lines, buttons);
   };
 
@@ -91,43 +91,43 @@
     if (p.dmg.frenzy) c.turn.frenzy = true;
     const w = D.weapons[p.wid], buttons = [];
     if (p.wid === 'greataxe' && !p.o.cleave && !p.o.hew && !c.turn.cleave) buttons.push({ label: 'Cleave', act: 'cleave' });
-    if (!p.o.hew) buttons.push({ label: p.crit ? 'Hew (kritiek)' : 'Hew (vijand neer)', act: 'hew', arg: p.wid });
-    APP.show({ who: 'charlie', title: '✔ Raak', big: p.dmg.total, sub: w.type, buttons });
+    if (!p.o.hew) buttons.push({ label: p.crit ? 'Hew (crit)' : 'Hew (enemy down)', act: 'hew', arg: p.wid });
+    APP.show({ who: 'charlie', title: '✔ Hit', big: p.dmg.total, sub: w.type, buttons });
   };
   APP.miss = () => {
     const c = C('charlie'), p = c.pending;
     c.pending = null;
-    const buttons = p && p.wid === 'greatsword' ? [{ label: 'Graze: 4 schade', act: 'graze' }] : [];
-    APP.show({ who: 'charlie', title: '✘ Mis', big: '—', buttons });
+    const buttons = p && p.wid === 'greatsword' ? [{ label: 'Graze: 4 damage', act: 'graze' }] : [];
+    APP.show({ who: 'charlie', title: '✘ Miss', big: '—', buttons });
   };
   APP.graze = () => APP.show({ who: 'charlie', title: 'Graze', big: 4, sub: 'slashing' });
 
   APP.shove = () => {
     const c = C('charlie');
     if (c.inCombat) {
-      if (c.turn.action && !ask('Je actie is deze beurt al gebruikt. Toch doen?')) return;
+      if (c.turn.action && !ask('Action already used. Do it anyway?')) return;
       c.turn.action = true;
     }
     if (c.raging) c.turn.kept = true;
-    APP.note('🤼 Shove / Grapple', ['Vijand doet een <b>STR- of DEX-save, DC 14</b>.'], { who: 'charlie' });
+    APP.note('🤼 Shove / Grapple', ['Target makes a <b>STR or DEX save, DC 14</b>.'], { who: 'charlie' });
   };
   APP.helpTalk = () => {
     const c = C('charlie');
     if (c.inCombat) c.turn.action = true;
-    APP.note('🤝 Help', ['Pim gooit met <b>voordeel</b>.'], { who: 'charlie' });
+    APP.note('🤝 Help', ['Pim rolls with <b>advantage</b>.'], { who: 'charlie' });
   };
 
   /* Beurt-hulp: alleen bonusactie en actie. */
   APP.charlieAdvice = () => {
     const c = C('charlie'), t = c.turn, s = c.situ, steps = [];
-    if (c.hp === 0) return { tip: '', steps: [{ k: 'Nu', title: '💀 Death save', act: 'deathSave', label: 'Gooi' }] };
-    if (!c.raging && c.rage > 0) steps.push({ k: 'Bonusactie', title: '😤 Rage', act: 'rage', done: t.bonus });
+    if (c.hp === 0) return { tip: '', steps: [{ k: 'Now', title: '💀 Death save', act: 'deathSave', label: 'Roll' }] };
+    if (!c.raging && c.rage > 0) steps.push({ k: 'Bonus action', title: '😤 Rage', act: 'rage', done: t.bonus });
     const w = s.boss ? 'greatsword' : 'greataxe', wp = D.weapons[w];
     const reck = t.reckless || t.recklessUsed;
-    steps.push({ k: 'Actie', title: `${wp.emoji} ${wp.name}`, why: s.paralyzed ? 'Raak = kritiek.' : '',
-      act: 'atk', arg: w, label: 'Aanvallen', done: t.action,
+    steps.push({ k: 'Action', title: `${wp.emoji} ${wp.name}`, why: s.paralyzed ? 'Hit = crit.' : '',
+      act: 'atk', arg: w, label: 'Attack', done: t.action,
       extra: `<button type="button" class="tog ${reck ? 'on' : ''}" data-act="turnToggle" data-arg="reckless">Reckless</button>` });
-    const tip = c.raging && !t.kept ? 'Val aan, anders stopt je Rage.' : 'Blijf binnen 6 vakjes van Pim.';
+    const tip = c.raging && !t.kept ? 'Attack, or your Rage ends.' : 'Stay within 6 squares of Pim.';
     return { tip, steps };
   };
 })();
