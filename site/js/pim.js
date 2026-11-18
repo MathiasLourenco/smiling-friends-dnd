@@ -39,7 +39,7 @@
     },
     charm() { note('🥰 Charm Person', [save('WIS'), 'Fail: it sees you as a friend for 1 hour. Afterwards it knows it was charmed.', 'It gets advantage on the save if you are fighting it.']); },
     suggestion() {
-      APP.show({ title: '💡 Suggestion', lines: ['It must hear and understand you.', save('WIS'), 'Fail: it does what you suggest (25 words or fewer) for up to 8 hours.', `Example: ${D.spells.suggestion.ex[0]}`],
+      APP.show({ title: '💡 Suggestion', lines: ['It must hear and understand you.', save('WIS'), 'Fail: it does what you suggest (25 words or fewer) for up to 8 hours.'],
         buttons: savedButtons('suggestion', 'It failed 💡', 'It saved') });
     },
     calm() {
