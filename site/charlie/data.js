@@ -32,8 +32,7 @@ window.CHD = (function () {
       ['War Caster', 'Advantage on CON saves to keep concentration. Somatic components with your hands full. When a creature leaves your reach, you can cast a 1-action spell targeting only it as your opportunity attack.'],
       ['Tough', '+2 HP per level (+10, included).'],
       ['Human', 'Resourceful: Heroic Inspiration after every Long Rest. Skillful: Perception. Versatile: Tough.'],
-      ['Merchant', 'Animal Handling, Persuasion, Navigator\'s Tools. Feat: Lucky.'],
-      ['Level 6 — Bend Luck', 'Reaction + 1 SP right after a creature you see rolls a d20 for a D20 Test: add or subtract 1d4.']
+      ['Merchant', 'Animal Handling, Persuasion, Navigator\'s Tools. Feat: Lucky.']
     ],
     gear: ['Arcane focus (crystal)', '2 daggers', 'Spear', 'Dungeoneer\'s Pack', 'Navigator\'s Tools', '2 pouches', 'Traveler\'s clothes', 'Diamond (50 gp) for Chromatic Orb'],
     profs: 'Armor: none · Weapons: simple · Tools: Navigator\'s Tools · Languages: Common + 2'
