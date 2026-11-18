@@ -39,7 +39,7 @@
     },
     charm() { note('🥰 Charm Person', [save('WIS'), 'Fail: it sees you as a friend for 1 hour. Afterwards it knows it was charmed.', 'It gets advantage on the save if you are fighting it.']); },
     suggestion() {
-      APP.show({ title: '💡 Suggestion', lines: ['It must hear and understand you.', save('WIS'), 'Fail: it does what you suggest (25 words or fewer) for up to 8 hours.'],
+      APP.show({ title: '💡 Suggestion', lines: ['It must hear and understand you.', save('WIS'), 'Fail: it does what you suggest (25 words or fewer) for up to 8 hours.', `Example: ${D.spells.suggestion.ex[0]}`],
         buttons: savedButtons('suggestion', 'It failed 💡', 'It saved') });
     },
     calm() {
@@ -47,8 +47,8 @@
         buttons: savedButtons('calm', 'Some failed 😌', 'Everyone saved') });
     },
     tongues() { note('🗣️ Tongues', ['For 1 hour you understand every language, and everyone understands you.']); },
-    illusion() { note('🪄 Minor Illusion', ['Tell the DM what sound or object you create (5 ft cube, 1 minute).']); },
-    prestidigitation() { note('✨ Prestidigitation', ['Tell the DM which small trick you do.']); }
+    illusion() { note('🪄 Minor Illusion', ['Tell the DM what sound or small object you make (1 minute).', 'Ideas: ' + D.spells.illusion.ex.join(' · ')]); },
+    prestidigitation() { note('✨ Prestidigitation', ['Tell the DM which small trick you do.', 'Ideas: ' + D.spells.prestidigitation.ex.join(' · ')]); }
   };
 
   APP.cast = (id) => {

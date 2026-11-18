@@ -34,7 +34,7 @@ window.SF = (function () {
     skillProf: ['Acrobatics', 'Deception', 'Insight', 'Performance', 'Persuasion'],
     expertise: ['Deception', 'Persuasion'],
     silverTongue: ['Deception', 'Persuasion'],
-    stats: [['AC', '14'], ['Spell DC', '15'], ['Spell attack', '+7'], ['Speed', '30 ft'], ['Initiative', '+3'], ['Passive Perception', '12'], ['Bardic die', 'd8']],
+    stats: [['AC', '14'], ['Spell save DC', '15'], ['Spell attack', '+7'], ['Speed', '30 ft'], ['Initiative', '+3'], ['Passive Perception', '12'], ['Bardic die', 'd8']],
     features: [
       ['Bardic Inspiration', 'Bonus action, 4 per rest. An ally within 60 ft can add 1d8 to a d20 roll they fail in the next hour.'],
       ['Silver Tongue', 'Persuasion and Deception: a d20 roll of 9 or lower counts as a 10.'],
@@ -42,7 +42,7 @@ window.SF = (function () {
       ['Font of Inspiration', 'Bardic Inspiration comes back on a short rest. Spend a spell slot to get 1 back.'],
       ['Expertise', 'Double proficiency in Persuasion and Deception (+10).'],
       ['Jack of All Trades', '+1 to skill checks you aren\'t proficient in.'],
-      ['Spellcasting', 'Spell DC 15, spell attack +7. Slots: 4× level 1, 3× level 2, 2× level 3.'],
+      ['Spellcasting', 'Spell save DC 15, spell attack +7. Slots: 4× level 1, 3× level 2, 2× level 3.'],
       ['Musician', 'After a short or long rest, play a song: up to 3 allies gain Heroic Inspiration.'],
       ['Plasmoid', 'Ooze. Darkvision 60 ft. Squeeze through 1-inch gaps without gear. Advantage to grapple or escape grapples. Hold breath 1 hour. Resistant to acid and poison.'],
       ['Shape Self', 'Action: grow arms and legs, or become a blob. Bonus action: a 10 ft pseudopod to open doors or grab tiny things.']
@@ -51,36 +51,39 @@ window.SF = (function () {
     profs: 'Armor: light · Weapons: simple · Instruments: lute + 6 more · Languages: Common + 2'
   };
 
-  /* time: action | bonus | none */
+  /* time: action | bonus | none. save: which save the target makes. ex: example uses. */
   const spells = {
-    mockery: { name: 'Vicious Mockery', emoji: '🤪', level: 0, time: 'action', range: '60 ft',
-      wat: 'WIS save. Fail: 2d6 psychic and disadvantage on its next attack.' },
+    mockery: { name: 'Vicious Mockery', emoji: '🤪', level: 0, time: 'action', range: '60 ft', save: 'WIS',
+      wat: 'Insult an enemy so badly it hurts (2d6 damage). Its next attack is also worse.' },
     inspiration: { name: 'Bardic Inspiration', emoji: '🎵', level: 'bi', time: 'bonus', range: '60 ft',
-      wat: 'Charlie can add 1d8 to a roll he fails in the next hour.' },
+      wat: 'Cheer Charlie on. If he fails a roll in the next hour, he adds 1d8 to it.' },
     unsettling: { name: 'Unsettling Words', emoji: '😰', level: 'bi', time: 'bonus', range: '60 ft',
-      wat: 'Target subtracts 1d8 from its next save. Use right before a spell.' },
+      wat: 'Say something that rattles an enemy, so your next spell works better on it.' },
     healingWord: { name: 'Healing Word', emoji: '💬', level: 1, time: 'bonus', range: '60 ft',
-      wat: 'Heal 2d4+4. Someone at 0 HP gets back up.' },
+      wat: 'A few kind words heal someone from a distance (2d4+4). Gets someone at 0 HP back up.' },
     aid: { name: 'Aid', emoji: '☀️', level: 2, time: 'action', range: '30 ft',
-      wat: 'Up to 3 creatures: +5 max HP for 8 hours.' },
+      wat: 'A morning pep talk: you and Charlie get +5 HP for the whole day (8 hours).' },
     invisibility: { name: 'Invisibility', emoji: '👻', level: 2, time: 'action', range: 'Touch', conc: true,
-      wat: 'Invisible for 1 hour, until you attack or cast a spell.' },
-    laughter: { name: 'Tasha\'s Hideous Laughter', emoji: '😂', level: 1, time: 'action', range: '30 ft', conc: true,
-      wat: 'WIS save. Fail: falls over laughing and can\'t act.' },
-    pattern: { name: 'Hypnotic Pattern', emoji: '🌀', level: 3, time: 'action', range: '120 ft', conc: true,
-      wat: '30 ft cube, WIS save. Fail: stuck in a daze. Taking damage wakes it up.' },
-    charm: { name: 'Charm Person', emoji: '🥰', level: 1, time: 'action', range: '30 ft',
-      wat: 'WIS save. Fail: sees you as a friend for 1 hour.' },
-    suggestion: { name: 'Suggestion', emoji: '💡', level: 2, time: 'action', range: '30 ft', conc: true,
-      wat: 'WIS save. Fail: does what you suggest (max 25 words) for up to 8 hours.' },
-    calm: { name: 'Calm Emotions', emoji: '😌', level: 2, time: 'action', range: '60 ft', conc: true,
-      wat: '20 ft radius, CHA save. Fail: angry people calm down.' },
+      wat: 'Touch someone and they turn invisible for 1 hour. Ends if they attack or cast a spell.' },
+    laughter: { name: 'Tasha\'s Hideous Laughter', emoji: '😂', level: 1, time: 'action', range: '30 ft', conc: true, save: 'WIS',
+      wat: 'One enemy finds everything so funny that it falls over laughing and can\'t do anything.' },
+    pattern: { name: 'Hypnotic Pattern', emoji: '🌀', level: 3, time: 'action', range: '120 ft', conc: true, save: 'WIS',
+      wat: 'Swirling colors in a big square. Enemies inside stare at it and can\'t move or act. Hitting them wakes them up.' },
+    charm: { name: 'Charm Person', emoji: '🥰', level: 1, time: 'action', range: '30 ft', save: 'WIS',
+      wat: 'Someone sees you as a good friend for 1 hour. Afterwards they know it was magic.' },
+    suggestion: { name: 'Suggestion', emoji: '💡', level: 2, time: 'action', range: '30 ft', conc: true, save: 'WIS',
+      wat: 'Give someone a reasonable idea (max 25 words) and they go do it, for up to 8 hours.',
+      ex: ['"Take a break, we\'ll guard the door."', '"Give us the key, it\'s safer with us."', '"Go tell your boss we\'re friends."'] },
+    calm: { name: 'Calm Emotions', emoji: '😌', level: 2, time: 'action', range: '60 ft', conc: true, save: 'CHA',
+      wat: 'Angry people nearby calm down and stop wanting to fight.' },
     tongues: { name: 'Tongues', emoji: '🗣️', level: 3, time: 'action', range: 'Touch',
       wat: 'For 1 hour you understand every language and everyone understands you.' },
     illusion: { name: 'Minor Illusion', emoji: '🪄', level: 0, time: 'action', range: '30 ft',
-      wat: 'A fake sound or object (5 ft cube) for 1 minute.' },
+      wat: 'Make a fake sound or a fake small object (up to a crate) for 1 minute.',
+      ex: ['Guards shouting in the next room', 'A fake crate to hide behind', 'Your voice calling from somewhere else', 'Footprints going the wrong way'] },
     prestidigitation: { name: 'Prestidigitation', emoji: '✨', level: 0, time: 'action', range: '10 ft',
-      wat: 'Small magic tricks: sparks, smells, clean, warm or cool things.' }
+      wat: 'Small, harmless magic tricks.',
+      ex: ['Light or blow out a candle', 'Clean muddy clothes', 'Make food taste like cake', 'Draw a smiley on a wall (1 hour)', 'A puff of sparks or confetti', 'Warm up cold soup'] }
   };
 
   const spellGroups = [

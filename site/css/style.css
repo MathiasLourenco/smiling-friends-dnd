@@ -183,7 +183,10 @@ svg { display: block; }
 .sp-btns { display: flex; gap: 6px; }
 .btn.xs { min-height: 38px; padding: 4px 12px; font-size: .85rem; border-width: 2px; box-shadow: 2px 2px 0 var(--ink); border-radius: 10px; }
 .pill.lv { background: #fff; }
+.pill.sv { background: #d6f0ff; }
 .sprow.empty { opacity: .4; }
+.ex { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.ex span { font-size: .78rem; background: var(--accent-l); border: 2px dashed var(--accent-d); border-radius: 10px; padding: 2px 8px; }
 
 /* ---------- Talk ---------- */
 .talkgrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 12px; }

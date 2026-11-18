@@ -90,16 +90,12 @@
     const empty = sp.level === 'bi' ? c.bi === 0 : sp.level > 0 && !APP.lowestSlot(sp.level);
     return `<div class="sprow ${c.conc === id ? 'active' : ''} ${empty ? 'empty' : ''}"><span class="emoji">${sp.emoji}</span>
       <div class="sp-main"><div class="sp-name"><b>${sp.name}</b><span class="pill t-${sp.time}">${TIME_SHORT[sp.time]}</span>
-        <span class="pill lv">${lvl}</span>${sp.conc ? '<span class="pill conc">Conc.</span>' : ''}<span class="rng">${sp.range}</span></div>
-        <small>${sp.wat}</small></div>
+        <span class="pill lv">${lvl}</span>${sp.conc ? '<span class="pill conc">Conc.</span>' : ''}${sp.save ? `<span class="pill sv">${sp.save} save</span>` : ''}<span class="rng">${sp.range}</span></div>
+        <small>${sp.wat}</small>${sp.ex ? `<div class="ex">${sp.ex.map((e) => `<span>${e}</span>`).join('')}</div>` : ''}</div>
       <div class="sp-btns">${btn(sp.level === 'bi' ? 'Use' : 'Cast', 'cast', id, 'xs')}</div></div>`;
   }
   const group = (g) => `<section class="card spgroup"><h3>${g[0]}</h3>${g[1].map(spRow).join('')}</section>`;
-  function summary() {
-    const c = S();
-    return `<div class="card slim"><div class="resline"><span>Slots: L1 <b>${c.slots[1]}</b>/4 · L2 <b>${c.slots[2]}</b>/3 · L3 <b>${c.slots[3]}</b>/2</span>
-      <span>🎵 <b>${c.bi}</b>/4</span><span>Spell DC <b>15</b> · attack <b>+7</b></span></div></div>`;
-  }
+  const summary = () => `<div class="card slim"><div class="resline"><span>Spell save DC <b>${P.spellDC}</b></span><span>Spell attack <b>+${P.spellAtk}</b></span></div></div>`;
   const viewSpells = () => `${summary()}<div class="grid"><div class="col">${D.spellGroups.slice(0, 3).map(group).join('')}</div>
     <div class="col">${D.spellGroups.slice(3).map(group).join('')}</div></div>`;
 
