@@ -22,7 +22,7 @@ D&D 2024 rules, level 5. Pim's app (`/`) is made for a brand-new player; Charlie
 
 ## Charlie's app
 
-- **Status bar**: Tides of Chaos (tap to arm it for the next d20), spell DC and attack (Innate Sorcery included), SP, AC, situational advantage/disadvantage and Metamagic (Careful, Subtle).
+- **Status bar**: spell DC and attack (Innate Sorcery included), SP and Metamagic (Careful, Subtle). Tides of Chaos is armed on the Surge tab.
 - **Combat**: HP, death saves, round tracker with the one-slot-per-turn rule, quick casts with slot level, and every resource: slots (incl. slots made with Font of Magic), Sorcery Points, Innate Sorcery, Luck Points, Heroic Inspiration, Sorcerous Restoration, hit dice and rests.
 - **Spells**: full spell list with casting time, range, components, duration and upcasting. Casting rolls everything: attacks with crits, Sorcerous Burst's exploding 8s, Chromatic Orb leaps, each Scorching Ray, damage and DCs.
 - **Surge**: how Tides and surges work, a d100 roller, recent surges and the full searchable table. A slot spell cast while Tides is spent surges automatically; the optional d20 check can run automatically too. Special results (chain reaction, roll twice, shift with Sorcery Points) are handled.

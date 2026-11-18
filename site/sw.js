@@ -1,5 +1,5 @@
 /* Offline cache: after opening once, the app also works without internet. */
-const CACHE = 'sf-dnd-v13';
+const CACHE = 'sf-dnd-v14';
 const FILES = [
   './', 'index.html', 'manifest.json', 'css/style.css',
   'js/data.js', 'js/core.js', 'js/pim.js', 'js/flow.js', 'js/views.js', 'js/main.js',

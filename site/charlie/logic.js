@@ -32,7 +32,7 @@
   function fresh() {
     return { tab: 'combat', hp: C.maxHp, temp: 0, death: { s: 0, f: 0 }, hd: C.level,
       slots: { 1: 4, 2: 3, 3: 2 }, sp: C.spMax, luck: C.luckMax, heroic: true, innate: C.innateMax, innateLeft: 0, resto: true,
-      tides: true, armed: false, mode: 0, meta: '', autoCheck: true, mageArmor: false, shield: false, conc: null,
+      tides: true, armed: false, meta: '', autoCheck: true, mageArmor: false, shield: false, conc: null,
       inCombat: false, round: 0, turn: freshTurn(), chain: 0, surges: [], surgeCount: 0, hit: 0, filter: 'all', q: '',
       amt: '', last: null, lastTest: null, resultOpen: true, scrollTo: 0 };
   }
@@ -80,12 +80,7 @@
   const TIDES_USED = '🌊 Tides of Chaos used. Your next spell with a spell slot surges and recharges it.';
 
   function takeMode(adv, dis) {
-    const s = S();
-    adv = (adv || []).slice(); dis = (dis || []).slice();
-    if (s.mode === 1) adv.push('situational');
-    if (s.mode === -1) dis.push('situational');
-    s.mode = 0;
-    return { adv, dis };
+    return { adv: (adv || []).slice(), dis: (dis || []).slice() };
   }
   function settle(t) {
     t.nat = t.mode > 0 ? Math.max.apply(null, t.rolls) : t.mode < 0 ? Math.min.apply(null, t.rolls) : t.rolls[0];
@@ -543,7 +538,7 @@
   A.longRestYes = () => {
     Object.assign(S(), { hp: C.maxHp, temp: 0, death: { s: 0, f: 0 }, hd: C.level, slots: { 1: 4, 2: 3, 3: 2 }, sp: C.spMax, luck: C.luckMax,
       heroic: true, innate: C.innateMax, innateLeft: 0, resto: true, tides: true, armed: false, mageArmor: false, shield: false,
-      conc: null, chain: 0, inCombat: false, round: 0, turn: freshTurn(), surgeCount: 0, meta: '', mode: 0 });
+      conc: null, chain: 0, inCombat: false, round: 0, turn: freshTurn(), surgeCount: 0, meta: '' });
     A.note('🌙 Long rest done', ['Everything restored. Tides of Chaos is ready.']);
   };
 

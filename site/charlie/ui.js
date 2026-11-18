@@ -22,22 +22,14 @@
   }
 
   /* ---------- Status bar (Combat, Spells, Sheet) ---------- */
-  function tidesBtn() {
-    const s = S();
-    if (!s.tides) return '<button type="button" class="tides spent" data-act="arm"><b>🌊 Tides spent</b><small>next slot spell surges</small></button>';
-    return `<button type="button" class="tides ${s.armed ? 'armed' : 'ready'}" data-act="arm" aria-pressed="${s.armed}"><b>🌊 Tides ${s.armed ? 'armed' : 'ready'}</b><small>${s.armed ? 'advantage on your next d20' : 'tap: advantage on next d20'}</small></button>`;
-  }
   function modbar() {
     const s = S(), inn = A.innateOn();
-    const md = [[1, 'Adv'], [-1, 'Dis']].map((m) => tog(m[1], s.mode === m[0], 'mode', m[0])).join('');
     const mm = [['careful', 'Careful'], ['subtle', 'Subtle']].map((m) => tog(`${m[1]} <i>1 SP</i>`, s.meta === m[0], 'meta', m[0])).join('');
-    return `<section class="card modbar">${tidesBtn()}
+    return `<section class="card modbar">
       <div class="mstats">
         <span class="mstat ${inn ? 'boost' : ''}"><small>Spell DC</small><b>${A.dc()}</b></span>
         <span class="mstat ${inn ? 'boost' : ''}"><small>Spell atk</small><b>${sign(C.atk)}${inn ? '<i>adv</i>' : ''}</b></span>
-        <span class="mstat"><small>SP</small><b>${s.sp}/${C.spMax}</b></span>
-        <span class="mstat"><small>AC</small><b>${A.ac()}</b></span></div>
-      <div class="mgroup"><small>Next roll</small>${md}</div>
+        <span class="mstat"><small>SP</small><b>${s.sp}/${C.spMax}</b></span></div>
       <div class="mgroup"><small>Metamagic</small>${mm}</div>
       ${s.conc ? `<span class="badge conc">🧠 ${SPL[s.conc].name}${btn('Drop', 'drop', null, 'mini')}</span>` : ''}
       ${inn ? `<span class="badge innate">🔮 Innate · ${s.innateLeft} rnd</span>` : ''}</section>`;
@@ -219,7 +211,6 @@
       s.temp = Math.max(s.temp, v); s.amt = '';
       A.note('🛡️ Temp HP', [v < s.temp ? `You keep ${s.temp} (temp HP don't stack).` : ''], { big: s.temp });
     },
-    mode: (a) => { const s = S(); s.mode = s.mode === Number(a) ? 0 : Number(a); },
     meta: (a) => { const s = S(); s.meta = s.meta === a ? '' : a; },
     flag: (a) => { const s = S(); s[a] = !s[a]; if (a === 'tides' && !s.tides) s.armed = false; },
     heroicOn: () => { S().heroic = true; A.note('🎵 Heroic Inspiration', ['From Pim\'s Musician song after the rest.']); },
