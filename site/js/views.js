@@ -1,8 +1,8 @@
-/* Schermen opbouwen. */
+/* Screens. */
 (function () {
   'use strict';
-  const D = window.SF, APP = window.APP;
-  const { C, DC, sign } = APP;
+  const D = window.SF, P = D.pim, APP = window.APP;
+  const { S, sign } = APP;
 
   const btn = (label, act, arg, cls, extra) =>
     `<button type="button" class="btn ${cls || ''}" data-act="${act}"${arg !== undefined && arg !== null ? ` data-arg="${arg}"` : ''}${extra || ''}>${label}</button>`;
@@ -11,67 +11,46 @@
   const pips = (key, val, max, label) =>
     `<span class="pips" role="group" aria-label="${label}">${Array.from({ length: max }, (_, i) =>
       `<button type="button" class="pip ${i < val ? 'on' : ''}" data-act="pip" data-arg="${key}:${i}" aria-label="${label} ${i + 1}"></button>`).join('')}</span>`;
+  const modeToggles = () => [[0, 'Normal'], [1, 'Advantage'], [-1, 'Disadvantage']].map((m) => tog(m[1], S().mode === m[0], 'mode', m[0])).join('');
 
-  const TABS = {
-    pim: [['gevecht', '⚔️', 'Combat'], ['spells', '✨', 'Spells'], ['sheet', '📋', 'Sheet'], ['dice', '🎲', 'Dice'], ['regels', '📖', 'Rules']],
-    charlie: [['gevecht', '⚔️', 'Combat'], ['acties', '🪓', 'Actions'], ['sheet', '📋', 'Sheet'], ['dice', '🎲', 'Dice'], ['regels', '📖', 'Rules']]
-  };
+  const TABS = [['fight', '⚔️', 'Fight'], ['talk', '💬', 'Talk'], ['spells', '✨', 'Spells'], ['sheet', '📋', 'Sheet'], ['rules', '📖', 'Rules']];
 
   function header() {
-    const st = APP.st;
     return `<header class="top">
       <div class="brand"><span class="logo">Smiling Friends</span><span class="dnd">D&amp;D</span></div>
-      <nav class="who" aria-label="Choose character">
-        ${['pim', 'charlie'].map((id) => `<button type="button" class="whobtn ${id} ${st.who === id ? 'on' : ''}" data-act="who" data-arg="${id}">
-          ${DC(id).svg}<span><b>${DC(id).short}</b></span></button>`).join('')}
-      </nav></header>
-      <nav class="tabs" aria-label="Sections">${TABS[st.who].map((t) =>
-        `<button type="button" class="tab ${st.tab[st.who] === t[0] ? 'on' : ''}" data-act="tab" data-arg="${t[0]}"><span>${t[1]}</span>${t[2]}</button>`).join('')}</nav>`;
+      <div class="whobtn pim on">${P.svg}<span><b>${P.short}</b><small>Bard 5</small></span></div></header>
+      <nav class="tabs" aria-label="Sections">${TABS.map((t) =>
+        `<button type="button" class="tab ${APP.st.tab === t[0] ? 'on' : ''}" data-act="tab" data-arg="${t[0]}"><span>${t[1]}</span>${t[2]}</button>`).join('')}</nav>`;
   }
 
-  /* ---------- Gevecht ---------- */
-  function stepHtml(s) {
-    let actions = '';
-    if (s.btns) actions = s.btns.map((b) => btn(b.label, b.act, b.arg, 'sm')).join('');
-    else if (s.act) actions = btn(s.label || 'Do it', s.act, s.arg, 'sm');
-    if (s.extra) actions += s.extra;
-    return `<div class="step ${s.done ? 'done' : ''}"><div class="step-k">${s.k}</div>
-      <div class="step-b"><b>${s.title}</b>${s.why ? `<small>${s.why}</small>` : ''}</div>
+  /* ---------- Fight ---------- */
+  function stepHtml(s, i) {
+    const actions = s.act ? btn(s.label || 'Do it', s.act, s.arg) : '';
+    return `<div class="step ${s.done ? 'done' : ''}"><div class="num">${s.done ? '✔' : i + 1}</div>
+      <div class="step-b"><span class="kind">${s.kind}</span><b>${s.title}</b>${s.why ? `<small>${s.why}</small>` : ''}</div>
       <div class="step-a">${actions}</div></div>`;
   }
-  function turnCard(id) {
-    const c = C(id);
+  function turnCard() {
+    const c = S();
     if (!c.inCombat) {
-      const aid = id === 'pim' && !c.aid ? `<p class="tipline">☀️ Start of the day: Aid ${btn('Cast Aid', 'cast', 'aid', 'sm')}</p>` : '';
-      return `<div class="card turn"><h2>No combat</h2>${aid}
-        <div class="row">${tog('⏰ Advantage on initiative', c.vb, 'flag', 'vb')}${btn('⚔️ Start combat', 'startCombat', null, 'big')}</div></div>`;
+      const prep = [];
+      if (!c.aid && APP.lowestSlot(2)) prep.push({ kind: 'Start of the day', title: '☀️ Aid', why: '+5 HP for you and Charlie, for 8 hours.', act: 'cast', arg: 'aid' });
+      if (!c.charlieBI && c.bi > 0) prep.push({ kind: 'Before a fight', title: '🎵 Bardic Inspiration', why: 'Give Charlie a 1d8 to save a bad roll.', act: 'cast', arg: 'inspiration' });
+      return `<div class="card turn"><h2>No fight right now</h2>
+        ${prep.length ? `<div class="steps">${prep.map(stepHtml).join('')}</div>` : '<p class="muted">All set.</p>'}
+        <div class="row">${btn('⚔️ The fight starts', 'startCombat', null, 'big')}</div></div>`;
     }
-    const adv = id === 'pim' ? APP.pimAdvice() : APP.charlieAdvice();
-    const situ = id === 'pim'
-      ? [['low', 'Ally (nearly) down'], ['humanoid', 'Humanoid boss'], ['undead', 'Undead']]
-      : [['paralyzed', 'Target paralyzed'], ['boss', 'High AC']];
+    const adv = APP.advice();
+    const situ = [['down', '🆘 Charlie is down'], ['many', '👥 Lots of enemies'], ['boss', '💪 One tough enemy']];
     return `<div class="card turn">
       <div class="turnhead"><h2>Your turn</h2><span class="round">Round ${c.round}</span></div>
-      <div class="situ">${situ.map((s) => tog(s[1], !!c.situ[s[0]], 'situ', s[0])).join('')}</div>
+      <div class="situ"><span class="label">What's happening?</span>${situ.map((s) => tog(s[1], !!c.situ[s[0]], 'situ', s[0])).join('')}</div>
       <div class="steps">${adv.steps.map(stepHtml).join('')}</div>
-      ${adv.tip ? `<p class="tipline">${adv.tip}</p>` : ''}
-      <div class="row">${btn('▶ Next turn', 'newTurn', null, 'big')}${btn('End combat', 'endCombat', null, 'ghost')}</div></div>`;
+      ${adv.tip ? `<p class="tipline">💡 ${adv.tip}</p>` : ''}
+      <div class="row">${btn('▶ My next turn', 'newTurn', null, 'big')}${btn('Fight over', 'endCombat', null, 'ghost')}</div></div>`;
   }
-  function badges(id) {
-    const c = C(id), b = [];
-    if (id === 'pim') {
-      if (c.conc) b.push(`<span class="badge conc">Concentrating: ${D.spells[c.conc].name} ${btn('stop', 'stopConc', null, 'mini')}</span>`);
-      if (c.zone) b.push(`<span class="badge zone">🌅 Twilight Sanctuary (${c.zone}) ${btn('Pim', 'zoneTemp', 'pim', 'mini')}${btn('Charlie', 'zoneTemp', 'charlie', 'mini')}</span>`);
-    } else {
-      if (c.raging) b.push(`<span class="badge rage">😤 Raging ${btn('stop', 'stopRage', null, 'mini')}</span>`);
-      if (c.situ.paralyzed) b.push('<span class="badge zone">Target paralyzed</span>');
-    }
-    if (c.blessed) b.push('<span class="badge">Bless</span>');
-    if (c.aid) b.push('<span class="badge">Aid +5</span>');
-    return b.length ? `<div class="badges">${b.join('')}</div>` : '';
-  }
-  function statusCard(id) {
-    const c = C(id), d = DC(id), m = APP.maxHp(id);
+  function hpCard() {
+    const c = S(), m = APP.maxHp();
     const pct = Math.max(0, Math.round((c.hp / m) * 100));
     const low = c.hp === 0 ? 'zero' : pct <= 33 ? 'low' : pct <= 66 ? 'mid' : '';
     const death = c.hp === 0 ? `<div class="deathbox"><b>Death saves</b>
@@ -79,138 +58,111 @@
     return `<div class="card status">
       <div class="hprow"><div class="hpnum ${low}"><span class="big">${c.hp}</span><span class="of">/ ${m} HP</span>
         ${c.temp ? `<span class="temp">+${c.temp} temp</span>` : ''}</div>
-        <div class="acbox"><small>AC</small><b>${d.ac}</b></div></div>
+        <div class="acbox"><small>AC</small><b>${P.ac}</b></div></div>
       <div class="hpbar ${low}"><i style="width:${pct}%"></i></div>
       <div class="amt">${btn('−5', 'amt', -5, 'sq')}${btn('−1', 'amt', -1, 'sq')}
         <input id="amt" type="number" inputmode="numeric" min="0" placeholder="0" value="${APP.st.amt}" aria-label="Amount">
         ${btn('+1', 'amt', 1, 'sq')}${btn('+5', 'amt', 5, 'sq')}</div>
       <div class="row3">${btn('Damage', 'dmg', null, 'bad')}${btn('Heal', 'heal', null, 'ok')}${btn('Temp HP', 'temp')}</div>
-      ${death}${badges(id)}</div>`;
+      <div class="row">${tog('☣️ Acid or poison? (you take half)', c.acid, 'flag', 'acid')}</div>
+      ${death}</div>`;
   }
-  function resCard(id) {
-    const c = C(id), more = APP.st.more[id];
+  function stuffCard() {
+    const c = S(), more = APP.st.more;
     const row = (label, html) => `<div class="resrow"><span>${label}</span><div>${html}</div></div>`;
-    const main = id === 'pim'
-      ? row('Level 1 slots', pips('s1', c.slots[1], 4, 'Level 1 slot')) + row('Level 2 slots', pips('s2', c.slots[2], 3, 'Level 2 slot')) +
-        row('Channel Divinity', pips('cd', c.cd, 2, 'Channel Divinity'))
-      : row('Rage', pips('rage', c.rage, 3, 'Rage') + tog(c.raging ? 'Raging' : 'Not raging', c.raging, 'rageToggle'));
-    let extra = '';
-    if (more) {
-      extra = (id === 'pim' ? row('Lucky', pips('lucky', c.lucky, 2, 'Lucky') + btn('impose disadvantage', 'luckyDis', null, 'mini')) + row('Eyes of Night', pips('eyes', c.eyes, 1, 'Eyes of Night')) : '') +
-        row('Heroic Inspiration', tog(c.heroic ? 'Ready' : 'Used', c.heroic, 'flag', 'heroic')) +
-        row(`Hit Dice (d${DC(id).hitDie})`, pips('hd', c.hitDice, 4, 'Hit Die')) +
-        `<div class="row wrap">${tog('Aid', c.aid, 'aid')}${tog('Bless', c.blessed, 'flag', 'blessed')}${id === 'pim' ? tog('Guidance', c.guidance, 'flag', 'guidance') : tog('Halve weapon damage while raging', c.phys, 'flag', 'phys')}</div>`;
-    }
-    return `<div class="card res">${main}${extra}
-      <div class="row3">${btn(more ? 'Less ▴' : 'More ▾', 'more', null, 'ghost sm')}${btn('Short rest', 'shortRest', null, 'sm')}${btn('Long rest', 'longRest', null, 'sm')}</div></div>`;
+    let html = row('Spell slots level 1', pips('s1', c.slots[1], 4, 'Level 1 slot')) +
+      row('Spell slots level 2', pips('s2', c.slots[2], 3, 'Level 2 slot')) +
+      row('Spell slots level 3', pips('s3', c.slots[3], 2, 'Level 3 slot')) +
+      row('Bardic Inspiration', pips('bi', c.bi, P.biMax, 'Bardic Inspiration') + (c.bi < P.biMax ? btn('+1', 'font', null, 'mini', ' title="Spend a spell slot"') : ''));
+    if (c.charlieBI) html += `<div class="badges"><span class="badge zone">🎵 Charlie has your inspiration ${btn('he used it', 'flag', 'charlieBI', 'mini')}</span></div>`;
+    if (c.conc) html += `<div class="badges"><span class="badge conc">🧠 Concentrating: ${D.spells[c.conc].name} ${btn('stop', 'stopConc', null, 'mini')}</span></div>`;
+    if (more) html += row(`Hit Dice (d${P.hitDie})`, pips('hd', c.hitDice, P.level, 'Hit Die')) + `<div class="row">${tog('☀️ Aid (+5 HP)', c.aid, 'aid')}</div>`;
+    return `<div class="card res">${html}
+      <div class="row3">${btn(more ? 'Less ▴' : 'More ▾', 'more', null, 'ghost sm')}${btn('☕ Short rest', 'shortRest', null, 'sm')}${btn('🛌 Long rest', 'longRest', null, 'sm')}</div></div>`;
   }
-  function viewGevecht(id) {
-    return `<div class="grid"><section class="col">${turnCard(id)}</section><section class="col">${statusCard(id)}${resCard(id)}</section></div>`;
+  const viewFight = () => `<div class="grid"><section class="col">${turnCard()}</section><section class="col">${hpCard()}${stuffCard()}</section></div>`;
+
+  /* ---------- Spell rows ---------- */
+  const TIME_SHORT = { action: 'Action', bonus: 'Bonus', none: 'Free' };
+  function spRow(id) {
+    const sp = D.spells[id], c = S();
+    const lvl = sp.level === 0 ? 'Free' : sp.level === 'bi' ? 'Inspiration' : 'Level ' + sp.level;
+    const empty = sp.level === 'bi' ? c.bi === 0 : sp.level > 0 && !APP.lowestSlot(sp.level);
+    return `<div class="sprow ${c.conc === id ? 'active' : ''} ${empty ? 'empty' : ''}"><span class="emoji">${sp.emoji}</span>
+      <div class="sp-main"><div class="sp-name"><b>${sp.name}</b><span class="pill t-${sp.time}">${TIME_SHORT[sp.time]}</span>
+        <span class="pill lv">${lvl}</span>${sp.conc ? '<span class="pill conc">Conc.</span>' : ''}<span class="rng">${sp.range}</span></div>
+        <small>${sp.wat}</small></div>
+      <div class="sp-btns">${btn(sp.level === 'bi' ? 'Use' : 'Cast', 'cast', id, 'xs')}</div></div>`;
+  }
+  const group = (g) => `<section class="card spgroup"><h3>${g[0]}</h3>${g[1].map(spRow).join('')}</section>`;
+  function summary() {
+    const c = S();
+    return `<div class="card slim"><div class="resline"><span>Slots: L1 <b>${c.slots[1]}</b>/4 · L2 <b>${c.slots[2]}</b>/3 · L3 <b>${c.slots[3]}</b>/2</span>
+      <span>🎵 <b>${c.bi}</b>/4</span><span>Spell DC <b>15</b> · attack <b>+7</b></span></div></div>`;
+  }
+  const viewSpells = () => `${summary()}<div class="grid"><div class="col">${D.spellGroups.slice(0, 3).map(group).join('')}</div>
+    <div class="col">${D.spellGroups.slice(3).map(group).join('')}</div></div>`;
+
+  /* ---------- Talk ---------- */
+  function viewTalk() {
+    const tiles = D.talkSkills.map((t) => {
+      const st = P.silverTongue.includes(t[0]);
+      return `<button type="button" class="talk" data-act="skill" data-arg="${t[0]}"><span class="emoji">${t[1]}</span>
+        <b>${t[0]}</b><small>${t[2]}</small><span class="md">${sign(APP.skillMod(t[0]))}</span>${st ? '<span class="pill conc">Never below 20</span>' : ''}</button>`;
+    }).join('');
+    return `<div class="card"><div class="turnhead"><h2>Talk</h2><div class="row wrap tight">${modeToggles()}</div></div>
+        <p class="muted">Say what Pim says. When the DM asks for a roll, tap it here.</p>
+        <div class="talkgrid">${tiles}</div></div>
+      <section class="card spgroup"><h3>Talk magic</h3><p class="tipline">💡 Use Unsettling Words right before a spell.</p>
+        ${['unsettling', 'charm', 'suggestion', 'calm', 'tongues'].map(spRow).join('')}</section>`;
   }
 
   /* ---------- Sheet ---------- */
-  function viewSheet(id) {
-    const d = DC(id), c = C(id), open = APP.st.feat;
-    const abil = Object.keys(D.ABIL).map((ab) => {
-      const p = d.saveProf.includes(ab);
-      return `<button type="button" class="abox" data-act="save" data-arg="${ab}"><span class="ab">${ab}</span><b>${sign(APP.abMod(id, ab))}</b>
-        <small>${d.abilities[ab]}</small><em>${p ? '● ' : ''}save ${sign(APP.saveMod(id, ab))}</em></button>`;
-    }).join('');
+  function viewSheet() {
+    const open = APP.st.feat;
+    const abil = Object.keys(D.ABIL).map((ab) => `<button type="button" class="abox" data-act="save" data-arg="${ab}"><span class="ab">${ab}</span>
+      <b>${sign(APP.abMod(ab))}</b><small>${P.abilities[ab]}</small><em>${P.saveProf.includes(ab) ? '● ' : ''}save ${sign(APP.saveMod(ab))}</em></button>`).join('');
     const skills = D.SKILLS.map((s) => {
-      const p = d.skillProf.includes(s[0]);
+      const p = P.skillProf.includes(s[0]), e = P.expertise.includes(s[0]);
       return `<button type="button" class="skill ${p ? 'prof' : ''}" data-act="skill" data-arg="${s[0]}">
-        <span class="nm"><b>${s[0]}</b><small>${s[1]}</small></span><span class="md">${sign(APP.skillMod(id, s[0]))}</span></button>`;
+        <span class="nm"><b>${s[0]}</b><small>${s[1]}${e ? ' · Expertise' : ''}</small></span><span class="md">${sign(APP.skillMod(s[0]))}</span></button>`;
     }).join('');
-    const mode = [[0, 'Normal'], [1, 'Advantage'], [-1, 'Disadvantage']].map((m) => tog(m[1], c.mode === m[0], 'mode', m[0])).join('');
     return `<div class="card sheet">
-      <div class="sheethead">${d.svg}<div class="sh-t"><h2>${d.name}</h2><div class="line">${d.line}</div></div>${btn('🖨️ Print', 'print', null, 'noprint sm')}</div>
-      <div class="statgrid"><div class="stat"><small>Max HP</small><b>${d.maxHp}</b></div>
-        ${d.stats.map((s) => `<div class="stat"><small>${s[0]}</small><b>${s[1]}</b></div>`).join('')}</div>
-      <div class="rollmode noprint"><span class="label">Tap to roll:</span>${mode}</div>
+      <div class="sheethead">${P.svg}<div class="sh-t"><h2>${P.name}</h2><div class="line">${P.line}</div></div>${btn('🖨️ Print', 'print', null, 'noprint sm')}</div>
+      <div class="statgrid"><div class="stat"><small>Max HP</small><b>${P.maxHp}</b></div>
+        ${P.stats.map((s) => `<div class="stat"><small>${s[0]}</small><b>${s[1]}</b></div>`).join('')}</div>
+      <div class="rollmode noprint"><span class="label">Tap to roll:</span>${modeToggles()}</div>
       <div class="abil">${abil}</div>
       <div class="skills">${skills}</div>
       <div class="noprint">${btn(open ? 'Hide features ▴' : 'Features & gear ▾', 'feat', null, 'ghost sm')}</div>
       <div class="fold ${open ? 'open' : ''}">
-        <div class="feats">${d.features.map((f) => `<div class="feat"><b>${f[0]}</b><p>${f[1]}</p></div>`).join('')}</div>
-        <p><b>Gear:</b> ${d.gear.join(', ')}</p><p class="muted">${d.profs}</p></div></div>`;
+        <div class="feats">${P.features.map((f) => `<div class="feat"><b>${f[0]}</b><p>${f[1]}</p></div>`).join('')}</div>
+        <p><b>Gear:</b> ${P.gear.join(', ')}</p><p class="muted">${P.profs}</p>
+        <div class="printonly"><h3>Spells</h3><p>${D.spellGroups.map((g) => `<b>${g[0]}:</b> ${g[1].map((id) => D.spells[id].name).join(', ')}`).join('<br>')}</p></div></div></div>`;
   }
 
-  /* ---------- Spells / Acties ---------- */
-  function spellButtons(id) {
-    const c = C('pim'), sp = D.spells[id];
-    if (id === 'toll') return btn('Hurt', 'cast', 'toll|injured', 'xs') + btn('Unhurt', 'cast', 'toll', 'xs ghost');
-    if (id === 'spiritualWeapon' && c.conc === id) return btn('Attack', 'swAttack', null, 'xs');
-    if (id === 'moonbeam' && c.conc === id) return btn('Move', 'moonbeamMove', null, 'xs');
-    return btn('Cast', 'cast', id, 'xs') + (sp.up ? btn('L2', 'cast', id + '|lvl2', 'xs ghost', ' title="Upcast with a level 2 slot"') : '');
-  }
-  const TIME_SHORT = { action: 'Action', bonus: 'Bonus', reaction: 'Reaction', none: 'Free' };
-  function spRow(o) {
-    return `<div class="sprow ${o.active ? 'active' : ''}"><span class="emoji">${o.emoji}</span>
-      <div class="sp-main"><div class="sp-name"><b>${o.name}</b><span class="pill t-${o.time}">${TIME_SHORT[o.time]}</span>
-        ${o.range ? `<span class="rng">${o.range}</span>` : ''}${o.conc ? '<span class="pill conc">Conc.</span>' : ''}</div>
-        <small>${o.wat}</small></div>
-      <div class="sp-btns">${o.buttons}</div></div>`;
-  }
-  function viewSpells() {
-    const c = C('pim');
-    const group = (g) => `<section class="card spgroup"><h3>${g[0]}</h3>${g[1].map((sid) => {
-      const sp = D.spells[sid];
-      return spRow({ active: c.conc === sid || (sid === 'sanctuary' && c.zone > 0), emoji: sp.emoji, name: sp.name,
-        time: sp.time, range: sp.range, conc: sp.conc, wat: sp.wat, buttons: spellButtons(sid) });
-    }).join('')}</section>`;
-    return `<div class="card slim"><div class="resline"><span>Level 1: <b>${c.slots[1]}</b>/4</span><span>Level 2: <b>${c.slots[2]}</b>/3</span>
-        <span>Channel Divinity: <b>${c.cd}</b>/2</span><span>Spell DC <b>14</b> · attack <b>+6</b></span></div></div>
-      <div class="grid"><div class="col">${D.spellGroups.slice(0, 3).map(group).join('')}</div>
-        <div class="col">${D.spellGroups.slice(3).map(group).join('')}</div></div>`;
-  }
-  function viewActies() {
-    const c = C('charlie');
-    return `<div class="card slim"><div class="resline"><span>Rage: <b>${c.rage}</b>/3</span><span>Attack <b>+6</b></span><span>Save DC <b>14</b></span>
-        ${tog('Reckless', c.turn.reckless || c.turn.recklessUsed, 'turnToggle', 'reckless')}</div></div>
-      <section class="card spgroup">${D.charlieActions.map((a) => spRow({ active: a.id === 'rage' && c.raging, emoji: a.emoji, name: a.name,
-        time: a.time, wat: a.wat, buttons: btn(a.id === 'intimidate' ? 'Roll' : 'Do it', a.act[0], a.act[1], 'xs') })).join('')}</section>`;
-  }
-
-  /* ---------- Dobbelstenen en regels ---------- */
-  function viewDice() {
-    const t = APP.st.tray;
-    const modes = [[0, 'Normal'], [1, 'Advantage'], [-1, 'Disadvantage']].map((m) => tog(m[1], t.mode === m[0], 'trayMode', m[0])).join('');
-    return `<div class="grid"><section class="col"><div class="card dice">
-        <div class="dierow">${[4, 6, 8, 10, 12, 20, 100].map((s) => `<button type="button" class="die ${t.s === s ? 'on' : ''}" data-act="die" data-arg="${s}">d${s}</button>`).join('')}</div>
-        <div class="steppers"><div><span class="label">Dice</span>${btn('−', 'trayN', -1, 'sq')}<b>${t.n}</b>${btn('+', 'trayN', 1, 'sq')}</div>
-          <div><span class="label">Modifier</span>${btn('−', 'trayMod', -1, 'sq')}<b>${sign(t.mod)}</b>${btn('+', 'trayMod', 1, 'sq')}</div></div>
-        ${t.s === 20 && t.n === 1 ? `<div class="row wrap">${modes}</div>` : ''}
-        ${btn(`Roll ${t.n}d${t.s}${t.mod ? ' ' + sign(t.mod) : ''}`, 'rollTray', null, 'big')}</div></section>
-      <section class="col"><div class="card log"><h3>Recent rolls</h3>${APP.st.log.length ? `<ol>${APP.st.log.map((l) =>
-        `<li class="who-${l.who}"><b>${l.big}</b><span>${l.title}<small>${l.sub}</small></span></li>`).join('')}</ol>` : '<p class="muted">No rolls yet.</p>'}
-        ${btn('Clear', 'clearLog', null, 'ghost sm')}</div></section></div>`;
-  }
-  function viewRegels() {
-    return `<div class="cards rules">${D.rules.map((r) => `<article class="card"><h3>${r[0]} ${r[1]}</h3><ul>${r[2].map((i) => `<li>${i}</li>`).join('')}</ul></article>`).join('')}</div>
-      <div class="row">${btn('Reset everything', 'resetAll', null, 'ghost sm')}</div>`;
-  }
+  /* ---------- Rules ---------- */
+  const viewRules = () => `<div class="cards rules">${D.rules.map((r) => `<article class="card"><h3>${r[0]} ${r[1]}</h3><ul>${r[2].map((i) => `<li>${i}</li>`).join('')}</ul></article>`).join('')}</div>
+    <div class="row">${btn('Reset everything', 'resetAll', null, 'ghost sm')}</div>`;
 
   function resultPanel() {
     const st = APP.st, r = st.last;
     if (!r) return '';
     const nat = r.nat === 20 ? 'nat20' : r.nat === 1 ? 'nat1' : '';
-    if (!st.resultOpen) {
-      return `<button type="button" class="resmini who-${r.who}" data-act="openResult"><b>${r.big === undefined ? '' : r.big}</b> ${r.title} ▴</button>`;
-    }
-    return `<div class="result who-${r.who}" role="status" aria-live="polite">
+    if (!st.resultOpen) return `<button type="button" class="resmini who-pim" data-act="openResult"><b>${r.big === undefined ? '' : r.big}</b> ${r.title} ▴</button>`;
+    return `<div class="result who-pim" role="status" aria-live="polite">
       <button type="button" class="close" data-act="closeResult" aria-label="Close">✕</button>
       <div class="r-main">${r.big !== undefined ? `<div class="r-big ${nat}">${r.big}</div>` : ''}
         <div class="r-txt"><b>${r.title}</b>${r.sub ? `<small>${r.sub}</small>` : ''}</div></div>
       ${r.lines.length ? `<ul>${r.lines.map((l) => `<li>${l}</li>`).join('')}</ul>` : ''}
-      ${r.buttons.length ? `<div class="row wrap">${r.buttons.map((b) => btn(b.label, b.act, b.arg, b.cls, ` data-who="${r.who}"`)).join('')}</div>` : ''}</div>`;
+      ${r.buttons.length ? `<div class="row wrap">${r.buttons.map((b) => btn(b.label, b.act, b.arg, b.cls)).join('')}</div>` : ''}</div>`;
   }
 
   APP.render = () => {
-    const st = APP.st, id = st.who;
-    if (!TABS[id].some((t) => t[0] === st.tab[id])) st.tab[id] = 'gevecht';
-    document.body.className = 'theme-' + id;
-    const views = { gevecht: viewGevecht, sheet: viewSheet, spells: viewSpells, acties: viewActies, dice: viewDice, regels: viewRegels };
-    document.getElementById('app').innerHTML = header() + `<main>${views[st.tab[id]](id)}</main>`;
+    const views = { fight: viewFight, talk: viewTalk, spells: viewSpells, sheet: viewSheet, rules: viewRules };
+    if (!views[APP.st.tab]) APP.st.tab = 'fight';
+    document.body.className = 'theme-pim';
+    document.getElementById('app').innerHTML = header() + `<main>${views[APP.st.tab]()}</main>`;
     document.getElementById('result').innerHTML = resultPanel();
     APP.save();
   };

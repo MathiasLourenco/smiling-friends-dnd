@@ -1,9 +1,9 @@
-/* Kern: dobbelstenen, opslag, d20-worpen, schade en concentratie. */
+/* Core: dice, saved state, d20 tests, damage and concentration. */
 (function () {
   'use strict';
-  const D = window.SF;
+  const D = window.SF, P = D.pim;
   const APP = window.APP = {};
-  const KEY = 'sf-dnd-v1';
+  const KEY = 'sf-dnd-pim-bard-v1';
 
   const rand = (sides) => {
     const buf = new Uint32Array(1);
@@ -19,23 +19,14 @@
   const ask = (msg) => window.confirm(msg);
   Object.assign(APP, { rand, roll, sum, sign, mod, ask });
 
-  function freshTurn() {
-    return { move: false, action: false, bonus: false, reaction: false, slot: false,
-      reckless: true, recklessUsed: false, frenzy: false, savage: false, cleave: false, kept: false };
-  }
-  function freshChar(id) {
-    const s = { hp: D.chars[id].maxHp, temp: 0, aid: false, heroic: true, hitDice: D.chars[id].level,
-      blessed: false, vb: false, death: { s: 0, f: 0 }, inCombat: false, round: 0,
-      turn: freshTurn(), situ: {}, mode: 0, guidance: false, phys: true, pending: null };
-    if (id === 'pim') Object.assign(s, { slots: { 1: 4, 2: 3 }, cd: 2, lucky: 2, eyes: 1, conc: null, zone: 0 });
-    else Object.assign(s, { rage: 3, raging: false });
-    return s;
+  const freshTurn = () => ({ action: false, bonus: false, slot: false });
+  function freshPim() {
+    return { hp: P.maxHp, temp: 0, aid: false, hitDice: P.level, death: { s: 0, f: 0 },
+      slots: { 1: 4, 2: 3, 3: 2 }, bi: P.biMax, charlieBI: false, conc: null,
+      inCombat: false, round: 0, turn: freshTurn(), situ: {}, mode: 0, acid: false };
   }
   function freshState() {
-    return { who: 'pim', tab: { pim: 'gevecht', charlie: 'gevecht' },
-      chars: { pim: freshChar('pim'), charlie: freshChar('charlie') },
-      log: [], last: null, lastTest: null, resultOpen: true, amt: '', more: { pim: false, charlie: false }, feat: false,
-      tray: { n: 1, s: 20, mod: 0, mode: 0 } };
+    return { tab: 'fight', pim: freshPim(), last: null, lastTest: null, resultOpen: true, amt: '', more: false, feat: false };
   }
   function merge(base, saved) {
     Object.keys(saved).forEach((k) => {
@@ -49,80 +40,59 @@
     try {
       const raw = localStorage.getItem(KEY);
       if (raw) return merge(freshState(), JSON.parse(raw));
-    } catch (e) { /* kapotte opslag: begin opnieuw */ }
+    } catch (e) { /* broken storage: start fresh */ }
     return freshState();
   }
   APP.st = load();
-  APP.save = () => { try { localStorage.setItem(KEY, JSON.stringify(APP.st)); } catch (e) { /* vol of privémodus */ } };
+  APP.save = () => { try { localStorage.setItem(KEY, JSON.stringify(APP.st)); } catch (e) { /* full or private mode */ } };
   APP.reset = () => { APP.st = freshState(); };
   APP.freshTurn = freshTurn;
 
-  const C = APP.C = (id) => APP.st.chars[id];
-  const DC = APP.DC = (id) => D.chars[id];
-  APP.maxHp = (id) => DC(id).maxHp + (C(id).aid ? 5 : 0);
-  APP.abMod = (id, ab) => mod(DC(id).abilities[ab]);
-  APP.saveMod = (id, ab) => APP.abMod(id, ab) + (DC(id).saveProf.includes(ab) ? DC(id).prof : 0);
-  APP.initMod = (id) => APP.abMod(id, 'DEX');
-  APP.skillMod = (id, name) => {
-    const d = DC(id), sk = D.SKILLS.find((s) => s[0] === name);
-    return mod(d.abilities[sk[1]]) + (d.skillProf.includes(name) ? d.prof : 0) + (d.skillBonus[name] || 0);
+  const S = APP.S = () => APP.st.pim;
+  APP.maxHp = () => P.maxHp + (S().aid ? 5 : 0);
+  APP.abMod = (ab) => mod(P.abilities[ab]);
+  APP.saveMod = (ab) => APP.abMod(ab) + (P.saveProf.includes(ab) ? P.prof : 0);
+  APP.skillMod = (name) => {
+    const ab = D.SKILLS.find((s) => s[0] === name)[1];
+    const bonus = P.expertise.includes(name) ? 2 * P.prof : P.skillProf.includes(name) ? P.prof : Math.floor(P.prof / 2);
+    return mod(P.abilities[ab]) + bonus;
   };
   APP.combine = (manual, adv, dis) => {
     const a = manual === 1 || adv, b = manual === -1 || dis;
     return a && b ? 0 : a ? 1 : b ? -1 : 0;
   };
+  APP.lowestSlot = (min) => {
+    for (let l = Math.max(1, min); l <= 3; l++) if (S().slots[l] > 0) return l;
+    return null;
+  };
 
-  /* Resultaat-paneel + logboek */
+  /* Result panel */
   APP.show = (res) => {
-    const st = APP.st;
-    res.who = res.who || st.who;
     res.lines = res.lines || [];
     res.buttons = res.buttons || [];
-    st.last = res;
-    st.resultOpen = true;
-    st.log.unshift({ who: res.who, title: res.title, big: res.big === undefined ? '' : res.big, sub: res.sub || '', time: Date.now() });
-    st.log = st.log.slice(0, 40);
+    APP.st.last = res;
+    APP.st.resultOpen = true;
   };
-  APP.note = (title, lines, extra) => APP.show(Object.assign({ title, lines }, extra || {}));
+  APP.note = (title, lines, extra) => APP.show(Object.assign({ title, lines: lines || [] }, extra || {}));
 
-  /* d20-worpen (aanval, save, check, initiatief, death save, concentratie) */
+  /* d20 tests: checks, saves, initiative, death saves, concentration */
   APP.runTest = (t) => {
     t.rolls = t.mode ? roll(2, 20) : roll(1, 20);
-    t.extras = [];
-    if (t.bless) t.extras.push({ label: 'Bless', val: rand(4) });
-    if (t.guidance) t.extras.push({ label: 'Guidance', val: rand(4) });
     APP.finishTest(t);
   };
   APP.finishTest = (t) => {
     t.nat = t.mode > 0 ? Math.max.apply(null, t.rolls) : t.mode < 0 ? Math.min.apply(null, t.rolls) : t.rolls[0];
-    t.total = t.nat + t.mod + sum(t.extras.map((e) => e.val));
+    t.die = t.floor10 ? Math.max(10, t.nat) : t.nat;
+    t.total = t.die + t.mod;
     APP.st.lastTest = t;
-    (APP.TESTS[t.kind] || APP.TESTS.check)(t);
+    APP.TESTS[t.kind](t);
   };
   APP.testShow = (t, title, lines, buttons) => {
-    const c = C(t.who);
-    const dice = t.rolls.length > 1
+    let dice = t.rolls.length > 1
       ? `d20: ${t.rolls.join(' & ')} → ${t.nat} (${t.mode > 0 ? 'advantage' : 'disadvantage'})`
       : `d20: ${t.nat}`;
-    const extras = t.extras.map((e) => ` + ${e.label} ${e.val}`).join('');
-    const btns = (buttons || []).slice();
-    if (c.heroic && !t.usedHeroic) btns.push({ label: '🌟 Heroic Inspiration: reroll', act: 'heroic', cls: 'ghost' });
-    if (t.who === 'pim' && c.lucky > 0 && t.mode < 1 && !t.usedLucky) btns.push({ label: '🍀 Lucky: extra d20', act: 'lucky', cls: 'ghost' });
-    APP.show({ who: t.who, title, big: t.total, sub: `${dice} ${sign(t.mod)}${extras}`, lines, buttons: btns, nat: t.nat });
-  };
-  APP.heroic = () => {
-    const t = APP.st.lastTest; if (!t) return;
-    const c = C(t.who); if (!c.heroic) return;
-    c.heroic = false; t.usedHeroic = true;
-    t.rolls[t.rolls.indexOf(t.nat)] = rand(20);
-    APP.finishTest(t);
-  };
-  APP.lucky = () => {
-    const t = APP.st.lastTest; if (!t || t.who !== 'pim') return;
-    const c = C('pim'); if (c.lucky <= 0) return;
-    c.lucky--; t.usedLucky = true;
-    if (t.mode === -1) { t.mode = 0; t.rolls = [t.rolls[0]]; } else { t.mode = 1; t.rolls.push(rand(20)); }
-    APP.finishTest(t);
+    if (t.die !== t.nat) dice += ' → 10 (Silver Tongue)';
+    APP.show({ title, big: t.total, sub: `${dice} ${sign(t.mod)}`, lines, buttons: buttons || [], nat: t.nat });
   };
 
   APP.TESTS = {
@@ -130,104 +100,65 @@
       const lines = [];
       if (t.note) lines.push(t.note);
       if (t.nat === 20) lines.push('🎉 Natural 20!');
-      if (t.nat === 1) lines.push('😬 Natural 1.');
+      if (t.nat === 1 && !t.floor10) lines.push('😬 Natural 1.');
       APP.testShow(t, t.label, lines);
     },
-    init(t) {
-      APP.testShow(t, '⚔️ Initiative', []);
-    },
+    init(t) { APP.testShow(t, '⚔️ Initiative', ['Tell the DM this number.']); },
     conc(t) {
-      const c = C('pim');
-      const pass = t.total >= t.dc;
-      if (!pass && c.conc === t.concSpell) { APP.endConc(true); t.ended = true; }
-      if (pass && t.ended && !c.conc) { APP.restoreConc(t.concSpell); t.ended = false; }
-      const name = D.spells[t.concSpell].name;
-      const lines = (t.prefix || []).concat([pass ? `✔ ${name} holds.` : `✘ ${name} ends.`]);
-      APP.testShow(t, `Concentration save (DC ${t.dc})`, lines);
+      const c = S(), pass = t.total >= t.dc, name = D.spells[t.spell].name;
+      if (!pass && c.conc === t.spell) { c.conc = null; t.ended = true; }
+      if (pass && t.ended) { c.conc = t.spell; t.ended = false; }
+      APP.testShow(t, `Concentration save (DC ${t.dc})`, (t.prefix || []).concat([pass ? `✔ ${name} keeps going.` : `✘ ${name} ends.`]));
     },
     death(t) {
-      const c = C(t.who);
+      const c = S();
       c.death = { s: t.before.s, f: t.before.f };
-      c.hp = t.beforeHp;
+      c.hp = 0;
       const lines = [];
       if (t.nat === 20) { c.hp = 1; c.death = { s: 0, f: 0 }; lines.push('🎉 You get up with 1 HP.'); }
       else if (t.nat === 1) { c.death.f += 2; lines.push('✘✘ Counts as two failures.'); }
       else if (t.total >= 10) { c.death.s += 1; lines.push('✔ Success.'); }
       else { c.death.f += 1; lines.push('✘ Failure.'); }
-      if (c.death.s >= 3) lines.push('Stable.');
-      if (c.death.f >= 3) lines.push('💀 Dead… ask the DM.');
+      if (c.death.s >= 3) lines.push('You are stable.');
+      if (c.death.f >= 3) lines.push('💀 Ask the DM.');
       APP.testShow(t, '💀 Death save', lines);
-    },
-    patk(t) {
-      const crit = t.nat === 20;
-      const n = t.dmg.n * (crit ? 2 : 1);
-      const r = roll(n, t.dmg.s);
-      const total = sum(r) + t.dmg.bonus;
-      const lines = [];
-      if (t.nat === 1) lines.push('Natural 1: miss.');
-      else lines.push(`${crit ? '💥 Crit! ' : ''}Hit: <b>${total} ${t.dmg.type}</b> (${n}d${t.dmg.s}${t.dmg.bonus ? ' + ' + t.dmg.bonus : ''}).`);
-      APP.testShow(t, t.label, lines);
     }
   };
 
-  /* Schade, heling, tijdelijke HP */
-  APP.heal = (id, amt) => {
-    const c = C(id), was0 = c.hp === 0;
-    c.hp = Math.min(APP.maxHp(id), c.hp + amt);
+  /* Damage and healing */
+  APP.heal = (amt) => {
+    const c = S(), was0 = c.hp === 0;
+    c.hp = Math.min(APP.maxHp(), c.hp + amt);
     if (was0 && c.hp > 0) c.death = { s: 0, f: 0 };
-    return was0 && c.hp > 0;
   };
-  APP.takeDamage = (id, amount) => {
-    const c = C(id);
+  APP.takeDamage = (amount) => {
+    const c = S();
     let a = Math.max(0, Math.floor(amount));
     if (!a) return;
     const lines = [];
-    if (id === 'charlie' && c.raging && c.phys) { a = Math.floor(a / 2); lines.push(`Rage: halved to ${a}.`); }
+    if (c.acid) { a = Math.floor(a / 2); lines.push(`Acid/poison: halved to ${a} (Plasmoid).`); c.acid = false; }
     const taken = a;
     if (c.hp === 0) {
-      if (!taken) return APP.show({ who: id, title: 'No damage', big: '0', lines });
       c.death.f += 1;
       lines.push('At 0 HP: 1 failed death save (2 on a crit).');
-      if (taken >= APP.maxHp(id)) lines.push('⚠️ This may kill you outright, ask the DM.');
-      return APP.show({ who: id, title: '💥 Hit at 0 HP', big: '−' + taken, lines });
+      return APP.show({ title: '💥 Hit at 0 HP', big: '−' + taken, lines });
     }
     const fromTemp = Math.min(c.temp, a);
     c.temp -= fromTemp; a -= fromTemp;
-    if (fromTemp) lines.push(`${fromTemp} from temp HP.`);
+    if (fromTemp) lines.push(`${fromTemp} came off your temp HP.`);
     c.hp -= a;
-    let down = false;
     if (c.hp <= 0) {
       const over = -c.hp;
-      c.hp = 0; down = true; c.death = { s: 0, f: 0 };
-      lines.push(over >= APP.maxHp(id) ? '⚠️ This may kill you outright, ask the DM.' : '😵 0 HP: roll a death save each turn.');
-      if (id === 'pim') {
-        if (c.conc) { lines.push(`${D.spells[c.conc].name} ends.`); APP.endConc(true); }
-        if (c.zone) { c.zone = 0; lines.push('Twilight Sanctuary ends.'); }
-      }
-      if (id === 'charlie' && c.raging) { c.raging = false; lines.push('Rage ends.'); }
+      c.hp = 0; c.death = { s: 0, f: 0 };
+      lines.push(over >= APP.maxHp() ? '⚠️ This much damage can kill you outright. Ask the DM.' : '😵 You drop to 0 HP. Roll a death save each turn.');
+      if (c.conc) { lines.push(`${D.spells[c.conc].name} ends.`); c.conc = null; }
+      return APP.show({ title: '💥 Damage', big: '−' + taken, sub: `0/${APP.maxHp()} HP`, lines });
     }
-    if (!down && id === 'pim' && c.conc && taken > 0) {
+    if (c.conc && taken > 0) {
       const dc = Math.min(30, Math.max(10, Math.floor(taken / 2)));
-      lines.unshift(`−${taken} HP, ${c.hp}/${APP.maxHp(id)} left.`);
-      return APP.runTest({ who: 'pim', kind: 'conc', mod: APP.saveMod('pim', 'CON'), mode: 1, bless: c.blessed, dc, concSpell: c.conc, prefix: lines });
+      lines.unshift(`−${taken} HP, ${c.hp}/${APP.maxHp()} left.`);
+      return APP.runTest({ kind: 'conc', mod: APP.saveMod('CON'), mode: 0, dc, spell: c.conc, prefix: lines });
     }
-    APP.show({ who: id, title: `💥 Damage`, big: '−' + taken, sub: `${c.hp}/${APP.maxHp(id)} HP left`, lines });
-  };
-
-  /* Concentratie (alleen Pim) */
-  APP.endConc = (silent) => {
-    const c = C('pim'), id = c.conc;
-    if (!id) return;
-    c.conc = null;
-    if (id === 'bless') { C('pim').blessed = false; C('charlie').blessed = false; }
-    if (id === 'holdPerson') C('charlie').situ.paralyzed = false;
-    if (id === 'guidance') c.guidance = false;
-    if (!silent) APP.note(`${D.spells[id].name} ended`, [], { who: 'pim' });
-  };
-  APP.restoreConc = (id) => {
-    const c = C('pim');
-    c.conc = id;
-    if (id === 'bless') { C('pim').blessed = true; C('charlie').blessed = true; }
-    if (id === 'guidance') c.guidance = true;
+    APP.show({ title: '💥 Damage', big: '−' + taken, sub: `${c.hp}/${APP.maxHp()} HP left`, lines });
   };
 })();

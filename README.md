@@ -1,35 +1,29 @@
-# Smiling Friends D&D — Pim & Charlie
+# Smiling Friends D&D — Pim Pimling
 
-Character sheets and a turn helper for a D&D duo based on Pim and Charlie from *Smiling Friends*.
-D&D 2024 rules, level 4.
+Character sheet and turn helper for Pim Pimling from *Smiling Friends*, made for a brand-new player.
+D&D 2024 rules, level 5. Charlie will be added later.
 
-| | Pim Pimling | Charlie Dompler |
-|---|---|---|
-| Player | New player | Experienced player |
-| Build | Twilight Cleric 4 · Human · Farmer | Berserker Barbarian 4 · Human · Soldier |
-| Feats | Lucky, Tough, War Caster | Tough, Savage Attacker, Great Weapon Master |
+| | Pim Pimling |
+|---|---|
+| Build | Bard 5 (College of Eloquence) · Plasmoid · Entertainer |
+| Feat | Musician (origin), Ability Score Improvement (level 4) |
+| Stats | STR 8 · DEX 16 · CON 14 · INT 8 · WIS 12 · CHA 18 |
+| Key numbers | 38 HP · AC 14 · Spell DC 15 · Persuasion/Deception +10, never below 20 |
 
 ## Features
 
-- **Turn helper**: shows only your action and bonus action, based on the situation (ally down, humanoid boss, undead).
-- **Trackers**: HP, temp HP, spell slots, Channel Divinity and Rage. Lucky, Hit Dice and the rest are under "More". Everything is saved.
-- **One-tap rolls**: attacks, spells, skills and saves with all bonuses included (Rage, Frenzy, Bless, Savage Attacker…).
-- **Concentration**: when you take damage, the app rolls your concentration save.
-- **Spell cards** with official names and a one-line summary.
-- **Rules cheat sheet** with the basics.
-- **Printable sheet** (🖨️ Print button), plus ready-made PDFs in [`sheets/`](sheets).
-- **Works offline**: after opening once, the app works without Wi-Fi. On a tablet you can add it to the home screen.
-
-## Usage
-
-Open the website on the tablet and pick **Pim** or **Charlie** at the top.
-Tip: *Share → Add to Home Screen* (iPad) or *⋮ → Install app* (Android) turns it into a standalone app.
+- **Fight**: shows at most 2 numbered steps per turn (action and bonus action), based on what's happening (Charlie down, lots of enemies, one tough enemy).
+- **Talk**: big buttons for Persuasion, Deception, Insight and Performance, plus the talk spells. Silver Tongue is applied automatically.
+- **Spells**: one row per spell, grouped by what it's for.
+- **Trackers**: HP, temp HP, spell slots, Bardic Inspiration and concentration. Everything is saved.
+- **Concentration**: when Pim takes damage, the app rolls the CON save.
+- **Printable sheet** (🖨️ Print button), plus a ready-made PDF in [`sheets/`](sheets).
+- **Works offline** after opening once. On a tablet you can add it to the home screen.
 
 ## Technical
 
 - Static site in [`site/`](site): HTML, CSS and JavaScript, no build step or dependencies.
 - Container: `nginx-unprivileged` on port **8080** ([`Dockerfile`](Dockerfile)), published to GitHub Packages by [`.github/workflows/container.yml`](.github/workflows/container.yml).
 - Website: deployed to GitHub Pages by [`.github/workflows/pages.yml`](.github/workflows/pages.yml).
-- Run locally: `docker build -t smiling-friends-dnd . && docker run -p 8080:8080 smiling-friends-dnd`, then open http://localhost:8080.
 - Game data (stats, spells, rules) lives in [`site/js/data.js`](site/js/data.js).
-- Twilight Domain (Tasha's) and Toll the Dead (Xanathar's) come from older books. They are officially usable with the 2024 rules; check with your DM.
+- College of Eloquence (Mythic Odysseys of Theros) and Plasmoid (Spelljammer) come from older books. They work with the 2024 rules; check with your DM.

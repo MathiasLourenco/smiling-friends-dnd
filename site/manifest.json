@@ -1,7 +1,7 @@
 {
-  "name": "Smiling Friends D&D — Pim & Charlie",
-  "short_name": "SF D&D",
-  "description": "Character sheets and turn helper for Pim and Charlie (D&D 2024, level 4).",
+  "name": "Pim Pimling — Smiling Friends D&D",
+  "short_name": "Pim",
+  "description": "Character sheet and turn helper for Pim Pimling, Bard 5 (D&D 2024).",
   "lang": "en",
   "start_url": "./",
   "scope": "./",

@@ -1,145 +1,145 @@
-/* Pim: casting spells, effects and turn advice. */
+/* Pim: spells, Bardic Inspiration and turn advice. */
 (function () {
   'use strict';
-  const D = window.SF, APP = window.APP;
-  const { roll, sum, ask, C } = APP;
+  const D = window.SF, P = D.pim, APP = window.APP;
+  const { roll, rand, sum, ask, S } = APP;
 
-  const TIME_KEY = { action: 'action', bonus: 'bonus', reaction: 'reaction' };
-  APP.TIME_LABEL = { action: 'Action', bonus: 'Bonus action', reaction: 'Reaction', none: 'Free' };
-
-  const lowestSlot = (c, min) => {
-    for (let l = Math.max(1, min); l <= 2; l++) if (c.slots[l] > 0) return l;
-    return null;
-  };
-  const giveButtons = (amount) => [
-    { label: 'To Pim', act: 'giveHeal', arg: 'pim:' + amount },
-    { label: 'To Charlie', act: 'giveHeal', arg: 'charlie:' + amount }
+  APP.TIME_LABEL = { action: 'Action', bonus: 'Bonus action', none: 'Free' };
+  const note = (title, lines, extra) => APP.note(title, lines, extra);
+  const save = (ab) => `Target makes a <b>${ab} save, DC ${P.spellDC}</b>.`;
+  const savedButtons = (id, failLabel, savedLabel) => [
+    { label: failLabel, act: 'closeResult', cls: 'ok' },
+    { label: savedLabel, act: 'saved', arg: id, cls: 'ghost' }
   ];
-  const saveRes = (title, ab, line, extra) => Object.assign({ who: 'pim', title, lines: [`Target makes a <b>${ab} save, DC 14</b>.`, line] }, extra || {});
-  const note = (title, line) => APP.note(title, line ? [line] : [], { who: 'pim' });
 
   const EFFECTS = {
-    toll(o) {
-      const die = o.injured ? 12 : 8, r = roll(1, die)[0];
-      APP.show(saveRes('🔔 Toll the Dead', 'WIS', `Fail: <b>${r} necrotic</b>.`, { big: r, sub: `1d${die}` }));
+    mockery() {
+      const r = sum(roll(2, 6));
+      APP.show({ title: '🤪 Vicious Mockery', big: r, sub: '2d6 psychic',
+        lines: [save('WIS'), `Fail: <b>${r} psychic</b> and disadvantage on its next attack.`] });
     },
-    sacred() {
-      const r = roll(1, 8)[0];
-      APP.show(saveRes('🔥 Sacred Flame', 'DEX', `Fail: <b>${r} radiant</b>.`, { big: r, sub: '1d8' }));
-    },
-    guidance() { C('pim').guidance = true; note('👍 Guidance', 'Pick a skill: +1d4 to those checks (1 minute).'); },
-    thaumaturgy() { note('🎭 Thaumaturgy', 'Describe the effect to the DM.'); },
-    spare() { note('🩹 Spare the Dying', 'The target is stable.'); },
-    bless() { C('pim').blessed = true; C('charlie').blessed = true; note('⭐ Bless', 'Pim and Charlie: +1d4 to attacks and saves.'); },
     healingWord(o) {
-      const n = 2 * o.lvl, r = roll(n, 4), total = sum(r) + 4;
-      APP.show({ who: 'pim', title: '💬 Healing Word', big: total, sub: `${n}d4 + 4`, lines: ['Who gets it?'], buttons: giveButtons(total) });
+      const n = 2 * o.lvl, total = sum(roll(n, 4)) + 4;
+      APP.show({ title: '💬 Healing Word', big: total, sub: `${n}d4 + 4`, lines: ['Who gets it?'],
+        buttons: [{ label: 'Pim', act: 'healSelf', arg: total }, { label: 'Charlie', act: 'healCharlie', arg: total }] });
     },
-    guidingBolt(o) {
-      APP.runTest({ who: 'pim', kind: 'patk', label: '☄️ Guiding Bolt', mod: 6, mode: C('pim').mode, bless: C('pim').blessed,
-        dmg: { n: 4 + (o.lvl - 1), s: 6, bonus: 0, type: 'radiant' } });
-    },
-    command() { note('📢 Command', 'Target makes a <b>WIS save, DC 14</b>. Pick: Approach, Drop, Flee, Grovel or Halt.'); },
-    faerieFire() { note('🟣 Faerie Fire', 'Everyone in the cube makes a <b>DEX save, DC 14</b>.'); },
-    sleep() { note('😴 Sleep', 'Everyone in the sphere makes a <b>WIS save, DC 14</b>.'); },
-    spiritualWeapon() { APP.swAttack(true); },
     aid() {
-      ['pim', 'charlie'].forEach((id) => { const c = C(id); if (!c.aid) { c.aid = true; c.hp += 5; } });
-      note('☀️ Aid', 'Pim and Charlie: +5 max HP for 8 hours.');
+      const c = S();
+      if (!c.aid) { c.aid = true; c.hp += 5; }
+      note('☀️ Aid', ['Pim and Charlie: +5 max HP and +5 HP for 8 hours.', 'Tell Charlie to add 5 HP.']);
     },
-    holdPerson() {
-      APP.show(saveRes('🧊 Hold Person', 'WIS', 'Fail: Paralyzed.', {
-        buttons: [{ label: 'Failed', act: 'holdFail' }, { label: 'Saved', act: 'holdPass', cls: 'ghost' }] }));
+    invisibility() { note('👻 Invisibility', ['Touch someone: invisible for 1 hour.', 'It ends when they attack, do damage or cast a spell.']); },
+    laughter() {
+      APP.show({ title: '😂 Tasha\'s Hideous Laughter', lines: [save('WIS'), 'Fail: it falls over laughing and can\'t act. It tries again each turn and when it gets hurt.'],
+        buttons: savedButtons('laughter', 'It failed 😂', 'It saved') });
     },
-    moonbeam() { APP.moonbeamHit(); },
-    seeInvis() { note('👓 See Invisibility', 'You see invisible creatures (1 hour).'); },
-    sanctuary() { C('pim').zone = 10; note('🌅 Twilight Sanctuary', 'Someone ends their turn inside? Tap 🌅 for temp HP.'); },
-    divineSpark() {
-      const r = roll(1, 8)[0] + 4;
-      APP.show({ who: 'pim', title: '⚡ Divine Spark', big: r, sub: '1d8 + 4',
-        lines: [`Or as damage: CON save DC 14, fail ${r}, success ${Math.floor(r / 2)}.`], buttons: giveButtons(r) });
+    pattern() {
+      APP.show({ title: '🌀 Hypnotic Pattern', lines: ['Everyone in a 30 ft cube makes a <b>WIS save, DC 15</b>.', 'Fail: dazed, can\'t move or act.', '⚠️ Don\'t hurt the dazed ones: damage wakes them up.'],
+        buttons: savedButtons('pattern', 'Some failed 🌀', 'Everyone saved') });
     },
-    turnUndead() { note('💀 Turn Undead', 'Undead within 30 ft make a <b>WIS save, DC 14</b>.'); },
-    vigilant() {
-      APP.show({ who: 'pim', title: '⏰ Vigilant Blessing', lines: ['Who do you touch?'],
-        buttons: [{ label: 'Myself', act: 'vbGive', arg: 'pim' }, { label: 'Charlie', act: 'vbGive', arg: 'charlie' }] });
+    charm() { note('🥰 Charm Person', [save('WIS'), 'Fail: it sees you as a friend for 1 hour. Afterwards it knows it was charmed.', 'It gets advantage on the save if you are fighting it.']); },
+    suggestion() {
+      APP.show({ title: '💡 Suggestion', lines: ['It must hear and understand you.', save('WIS'), 'Fail: it does what you suggest (25 words or fewer) for up to 8 hours.'],
+        buttons: savedButtons('suggestion', 'It failed 💡', 'It saved') });
     },
-    eyes() { note('🌌 Eyes of Night', 'Up to 4 friends see in the dark for 1 hour.'); }
+    calm() {
+      APP.show({ title: '😌 Calm Emotions', lines: ['People in a 20 ft radius make a <b>CHA save, DC 15</b>.', 'Fail: they stop being hostile (1 minute).'],
+        buttons: savedButtons('calm', 'Some failed 😌', 'Everyone saved') });
+    },
+    tongues() { note('🗣️ Tongues', ['For 1 hour you understand every language, and everyone understands you.']); },
+    illusion() { note('🪄 Minor Illusion', ['Tell the DM what sound or object you create (5 ft cube, 1 minute).']); },
+    prestidigitation() { note('✨ Prestidigitation', ['Tell the DM which small trick you do.']); }
   };
 
-  APP.swAttack = (fresh) => {
-    const c = C('pim');
-    if (!fresh) {
-      if (c.conc !== 'spiritualWeapon') return note('No Spiritual Weapon', 'Cast it first.');
-      if (c.inCombat && c.turn.bonus && !ask('Bonus action already used. Do it anyway?')) return;
-      if (c.inCombat) c.turn.bonus = true;
-    }
-    APP.runTest({ who: 'pim', kind: 'patk', label: '🔨 Spiritual Weapon', mod: 6, mode: c.mode, bless: c.blessed,
-      dmg: { n: 1, s: 8, bonus: 4, type: 'force' } });
-  };
-  APP.moonbeamHit = () => {
-    const r = sum(roll(2, 10));
-    APP.show(saveRes('🌙 Moonbeam', 'CON', `Fail: <b>${r} radiant</b>, success: <b>${Math.floor(r / 2)}</b>.`, { big: r, sub: '2d10' }));
-  };
-  APP.moonbeamMove = () => {
-    const c = C('pim');
-    if (c.conc !== 'moonbeam') return note('No Moonbeam', 'Cast it first.');
-    if (c.inCombat && c.turn.action && !ask('Action already used. Do it anyway?')) return;
-    if (c.inCombat) c.turn.action = true;
-    APP.moonbeamHit();
-  };
-
-  APP.cast = (id, opts) => {
-    opts = opts || {};
-    const sp = D.spells[id], c = C('pim');
-    if (c.hp === 0) return note('You are at 0 HP', 'Roll a death save.');
+  APP.cast = (id) => {
+    const sp = D.spells[id], c = S();
+    if (c.hp === 0) return note('You are at 0 HP', ['Roll a death save.']);
+    if (sp.level === 'bi') return id === 'inspiration' ? APP.inspire() : APP.unsettle();
     let lvl = null;
-    if (typeof sp.level === 'number' && sp.level > 0) {
-      lvl = opts.lvl || lowestSlot(c, sp.level);
-      if (!lvl || c.slots[lvl] <= 0) return note('No spell slots left', 'They come back after a long rest.');
+    if (sp.level > 0) {
+      lvl = APP.lowestSlot(sp.level);
+      if (!lvl) return note('No spell slots left', [`You have no level ${sp.level}+ slots. They come back after a long rest.`]);
       if (c.inCombat && c.turn.slot && !ask('You already used a spell slot this turn (max 1). Do it anyway?')) return;
     }
-    if (sp.level === 'cd' && c.cd <= 0) return note('No Channel Divinity left', 'You regain 1 on a short rest.');
-    if (id === 'eyes' && c.eyes <= 0) {
-      lvl = lowestSlot(c, 1);
-      if (!lvl) return note('Eyes of Night used up', 'No spell slots left either.');
-      if (!ask(`Free use is gone. Spend a level ${lvl} spell slot?`)) return;
-    }
-    const key = opts.reaction ? 'reaction' : TIME_KEY[sp.time];
-    const label = opts.reaction ? 'reaction' : APP.TIME_LABEL[sp.time].toLowerCase();
-    if (c.inCombat && key && c.turn[key] && !ask(`Your ${label} is already used this turn. Do it anyway?`)) return;
-    if (sp.conc && c.conc && !ask(`This ends ${D.spells[c.conc].name} (concentration). Continue?`)) return;
+    const key = sp.time === 'action' || sp.time === 'bonus' ? sp.time : null;
+    if (c.inCombat && key && c.turn[key] && !ask(`Your ${APP.TIME_LABEL[key].toLowerCase()} is already used this turn. Do it anyway?`)) return;
+    if (sp.conc && c.conc && c.conc !== id && !ask(`${D.spells[c.conc].name} stops (you can only concentrate on 1 spell). Continue?`)) return;
 
-    if (sp.conc && c.conc) APP.endConc(true);
     if (lvl) { c.slots[lvl]--; if (c.inCombat) c.turn.slot = true; }
-    if (sp.level === 'cd') c.cd--;
-    if (id === 'eyes' && !lvl) c.eyes--;
     if (c.inCombat && key) c.turn[key] = true;
     if (sp.conc) c.conc = id;
-    EFFECTS[id](Object.assign({ lvl: lvl || 1 }, opts));
+    EFFECTS[id]({ lvl: lvl || 1 });
+    if (lvl && lvl > sp.level) APP.st.last.lines.push(`Used a level ${lvl} slot (no level ${sp.level} left).`);
   };
 
-  /* Turn advice: action and bonus action only. */
-  APP.pimAdvice = () => {
-    const c = C('pim'), t = c.turn, s = c.situ, steps = [];
-    if (c.hp === 0) return { tip: '', steps: [{ k: 'Now', title: '💀 Death save', act: 'deathSave', label: 'Roll' }] };
-    const canSlot = !t.slot;
-    const has1 = c.slots[1] > 0 || c.slots[2] > 0, has2 = c.slots[2] > 0;
-    const wantHeal = s.low && has1 && canSlot;
-    let act, actionSlot = false;
-    if (s.low && !wantHeal && c.cd > 0) act = { title: '⚡ Divine Spark', why: 'No slot to heal with: this heals 1d8+4.', act: 'cast', arg: 'divineSpark' };
-    else if (c.zone === 0 && c.cd > 0) act = { title: '🌅 Twilight Sanctuary', why: 'Temp HP for both of you every turn.', act: 'cast', arg: 'sanctuary' };
-    else if (s.undead && c.cd > 0) act = { title: '💀 Turn Undead', why: 'Undead run away.', act: 'cast', arg: 'turnUndead' };
-    else if (!wantHeal && s.humanoid && has2 && canSlot && c.conc !== 'holdPerson') {
-      act = { title: '🧊 Hold Person', why: c.conc ? `Ends ${D.spells[c.conc].name}.` : 'Charlie next to it = every hit is a crit.', act: 'cast', arg: 'holdPerson' };
-      actionSlot = true;
-    } else act = { title: '🔔 Toll the Dead', why: 'Free.', btns: [{ label: 'Target hurt', act: 'cast', arg: 'toll|injured' }, { label: 'Target unhurt', act: 'cast', arg: 'toll' }] };
-    steps.push(Object.assign({ k: 'Action', done: t.action }, act));
+  const useBonus = () => {
+    const c = S();
+    if (c.inCombat && c.turn.bonus && !ask('Your bonus action is already used this turn. Do it anyway?')) return false;
+    if (c.inCombat) c.turn.bonus = true;
+    return true;
+  };
+  const noBI = () => note('No Bardic Inspiration left', ['It comes back after a short rest.', 'Or spend a spell slot: "+1" next to Bardic Inspiration.']);
 
-    if (wantHeal) steps.push({ k: 'Bonus action', title: '💬 Healing Word', why: 'Someone is (nearly) down.', act: 'cast', arg: 'healingWord', done: t.bonus });
-    else if (c.conc === 'spiritualWeapon') steps.push({ k: 'Bonus action', title: '🔨 Spiritual Weapon attack', why: 'Free.', act: 'swAttack', done: t.bonus });
-    else if (!c.conc && has2 && canSlot && !actionSlot) steps.push({ k: 'Bonus action', title: '🔨 Spiritual Weapon', why: 'Level 2 slot. Free attacks every turn after.', act: 'cast', arg: 'spiritualWeapon', done: t.bonus });
+  APP.inspire = () => {
+    const c = S();
+    if (c.bi <= 0) return noBI();
+    if (!useBonus()) return;
+    c.bi--; c.charlieBI = true;
+    note('🎵 Bardic Inspiration', ['Tell Charlie: if he fails a d20 roll in the next hour, he can add <b>1d8</b>.']);
+  };
+  APP.unsettle = () => {
+    const c = S();
+    if (c.bi <= 0) return noBI();
+    if (!useBonus()) return;
+    c.bi--;
+    const r = rand(P.biDie);
+    APP.show({ title: '😰 Unsettling Words', big: '−' + r, sub: '1d8',
+      lines: [`Tell the DM: the target subtracts <b>${r}</b> from its next save.`, 'Now cast your spell on it.'] });
+  };
+  APP.font = () => {
+    const c = S();
+    if (c.bi >= P.biMax) return note('Bardic Inspiration is full', []);
+    const lvl = APP.lowestSlot(1);
+    if (!lvl) return note('No spell slots left', []);
+    if (!ask(`Spend a level ${lvl} spell slot to get 1 Bardic Inspiration back?`)) return;
+    c.slots[lvl]--; c.bi++;
+    note('🎵 +1 Bardic Inspiration', [`Used a level ${lvl} spell slot.`]);
+  };
+  APP.saved = (id) => {
+    const c = S();
+    if (c.conc === id) c.conc = null;
+    note('Saved', [`${D.spells[id].name} didn't work. Your concentration is free again.`]);
+  };
 
-    return { tip: 'Stay within 6 squares of Charlie.', steps };
+  /* Turn advice: numbered steps, max 2. */
+  APP.advice = () => {
+    const c = S(), t = c.turn, s = c.situ;
+    if (c.hp === 0) return { steps: [{ kind: 'Start of turn', title: '💀 Death save', why: 'You are at 0 HP.', act: 'deathSave', label: 'Roll' }] };
+    const anySlot = APP.lowestSlot(1) !== null;
+    const holding = c.conc === 'pattern' || c.conc === 'laughter';
+    const wantHeal = s.down && anySlot && !t.slot;
+    let action, bonus = null;
+
+    if (wantHeal) {
+      bonus = { title: '💬 Healing Word', why: 'Charlie gets back up.', act: 'cast', arg: 'healingWord', done: t.bonus };
+      action = { title: '🤪 Vicious Mockery', why: 'Free.', act: 'cast', arg: 'mockery', done: t.action };
+    } else if (holding) {
+      action = { title: '🤪 Vicious Mockery', why: `Pick an enemy that is NOT stuck in ${D.spells[c.conc].name}.`, act: 'cast', arg: 'mockery', done: t.action };
+    } else if (s.many && c.slots[3] > 0 && !t.slot) {
+      action = { title: '🌀 Hypnotic Pattern', why: 'Stops a whole group at once.', act: 'cast', arg: 'pattern', done: t.action, save: true };
+    } else if (s.boss && anySlot && !t.slot) {
+      action = { title: '😂 Tasha\'s Hideous Laughter', why: 'The tough enemy falls over laughing.', act: 'cast', arg: 'laughter', done: t.action, save: true };
+    } else {
+      action = { title: '🤪 Vicious Mockery', why: 'Free. Make fun of an enemy.', act: 'cast', arg: 'mockery', done: t.action };
+    }
+
+    if (!bonus && action.save && c.bi > 0) bonus = { title: '😰 Unsettling Words', why: 'Do this FIRST on the main target: its save gets worse.', act: 'cast', arg: 'unsettling', done: t.bonus, first: true };
+    else if (!bonus && c.bi > 0 && !c.charlieBI) bonus = { title: '🎵 Bardic Inspiration', why: 'Give it to Charlie.', act: 'cast', arg: 'inspiration', done: t.bonus };
+
+    const steps = [];
+    if (bonus && (bonus.first || wantHeal)) steps.push(Object.assign({ kind: 'Bonus action' }, bonus));
+    steps.push(Object.assign({ kind: 'Action' }, action));
+    if (bonus && !(bonus.first || wantHeal)) steps.push(Object.assign({ kind: 'Bonus action' }, bonus));
+    return { steps, tip: 'Stay behind Charlie, not next to enemies.' };
   };
 })();

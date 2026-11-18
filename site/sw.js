@@ -1,8 +1,8 @@
-/* Offline-cache: na één keer openen werkt de app ook zonder internet. */
-const CACHE = 'sf-dnd-v4';
+/* Offline cache: after opening once, the app also works without internet. */
+const CACHE = 'sf-dnd-v5';
 const FILES = [
   './', 'index.html', 'manifest.json', 'css/style.css',
-  'js/data.js', 'js/core.js', 'js/pim.js', 'js/charlie.js', 'js/flow.js', 'js/views.js', 'js/main.js',
+  'js/data.js', 'js/core.js', 'js/pim.js', 'js/flow.js', 'js/views.js', 'js/main.js',
   'icons/icon.svg', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png'
 ];
 
