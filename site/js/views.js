@@ -26,18 +26,25 @@
   /* ---------- Fight ---------- */
   function stepHtml(s, i) {
     const actions = s.act ? btn(s.label || 'Do it', s.act, s.arg) : '';
+    const uses = s.uses ? `<span class="uses">${'●'.repeat(s.uses[0])}${'○'.repeat(s.uses[1] - s.uses[0])} ${s.uses[0]}/${s.uses[1]} left</span>` : '';
     return `<div class="step ${s.done ? 'done' : ''}"><div class="num">${s.done ? '✔' : i + 1}</div>
-      <div class="step-b"><span class="kind">${s.kind}</span><b>${s.title}</b>${s.why ? `<small>${s.why}</small>` : ''}</div>
+      <div class="step-b"><span class="kind">${s.kind}</span><b>${s.title}</b>${uses}${s.why ? `<small>${s.why}</small>` : ''}</div>
       <div class="step-a">${actions}</div></div>`;
+  }
+  function inspirationStep(kind) {
+    const c = S(), uses = [c.bi, P.biMax];
+    if (c.bi === 0) return { kind, title: '🎵 Bardic Inspiration', uses, why: 'All used. They come back after a short rest.' };
+    if (c.charlieBI) return { kind, title: '🎵 Bardic Inspiration', uses, why: 'Charlie has one now (max 1 at a time). Tap when he has used it.', act: 'flag', arg: 'charlieBI', label: 'He used it' };
+    return { kind, title: '🎵 Bardic Inspiration', uses, why: 'Give Charlie a 1d8 to save a bad roll.', act: 'cast', arg: 'inspiration' };
   }
   function turnCard() {
     const c = S();
     if (!c.inCombat) {
       const prep = [];
-      if (!c.aid && APP.lowestSlot(2)) prep.push({ kind: 'Start of the day', title: '☀️ Aid', why: '+5 HP for you and Charlie, for 8 hours.', act: 'cast', arg: 'aid' });
-      if (!c.charlieBI && c.bi > 0) prep.push({ kind: 'Before a fight', title: '🎵 Bardic Inspiration', why: 'Give Charlie a 1d8 to save a bad roll.', act: 'cast', arg: 'inspiration' });
+      if (!c.aid && APP.lowestSlot(2)) prep.push({ kind: 'Start of the day · once', title: '☀️ Aid', why: '+5 HP for you and Charlie, for 8 hours.', act: 'cast', arg: 'aid' });
+      prep.push(inspirationStep('Before a fight'));
       return `<div class="card turn"><h2>No fight right now</h2>
-        ${prep.length ? `<div class="steps">${prep.map(stepHtml).join('')}</div>` : '<p class="muted">All set.</p>'}
+        <div class="steps">${prep.map(stepHtml).join('')}</div>
         <div class="row">${btn('⚔️ The fight starts', 'startCombat', null, 'big')}</div></div>`;
     }
     const adv = APP.advice();

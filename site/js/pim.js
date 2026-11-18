@@ -134,7 +134,7 @@
     }
 
     if (!bonus && action.save && c.bi > 0) bonus = { title: '😰 Unsettling Words', why: 'Do this FIRST on the main target: its save gets worse.', act: 'cast', arg: 'unsettling', done: t.bonus, first: true };
-    else if (!bonus && c.bi > 0 && !c.charlieBI) bonus = { title: '🎵 Bardic Inspiration', why: 'Give it to Charlie.', act: 'cast', arg: 'inspiration', done: t.bonus };
+    else if (!bonus && c.bi > 0 && !c.charlieBI) bonus = { title: '🎵 Bardic Inspiration', why: 'Give it to Charlie.', act: 'cast', arg: 'inspiration', done: t.bonus, uses: [c.bi, P.biMax] };
 
     const steps = [];
     if (bonus && (bonus.first || wantHeal)) steps.push(Object.assign({ kind: 'Bonus action' }, bonus));
