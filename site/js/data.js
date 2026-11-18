@@ -78,13 +78,25 @@ window.SF = (function () {
     tongues: { name: 'Tongues', emoji: '🗣️', level: 3, time: 'action', range: 'Touch',
       wat: 'For 1 hour you understand every language and everyone understands you.' },
     illusion: { name: 'Minor Illusion', emoji: '🪄', level: 0, time: 'action', range: '30 ft',
-      wat: 'Make a fake sound or a fake small object (up to a crate) for 1 minute.',
-      when: 'To distract, scare or hide. It does no damage.',
-      ex: ['Guards shouting in the next room', 'A fake crate to hide behind', 'Your voice calling from somewhere else', 'Footprints going the wrong way'] },
+      wat: 'Make a fake sound OR a fake object for 1 minute. Pick one:',
+      opts: [
+        ['Sound', 'Any sound, from a whisper to a scream: your voice, someone else\'s voice, a lion\'s roar, drums… It can keep going, or play at moments you choose.'],
+        ['Image', 'A fake object up to 5 ft (a crate, a chair, footprints). It makes no sound, light or smell, and things pass right through it.']
+      ],
+      note: 'Someone who inspects it rolls Investigation vs your DC 15 to see it\'s fake. Casting it again ends the old one.',
+      when: 'To distract, scare or hide. It does no damage.' },
     prestidigitation: { name: 'Prestidigitation', emoji: '✨', level: 0, time: 'action', range: '10 ft',
-      wat: 'Small, harmless magic tricks.',
-      when: 'For fun, to impress people or to fix small things. Not in a fight.',
-      ex: ['Light or blow out a candle', 'Clean muddy clothes', 'Make food taste like cake', 'Draw a smiley on a wall (1 hour)', 'A puff of sparks or confetti', 'Warm up cold soup'] }
+      wat: 'Small, harmless magic trick. Pick one:',
+      opts: [
+        ['Sensory effect', 'Sparks, a puff of wind, soft music notes or a strange smell (for a moment).'],
+        ['Fire play', 'Light or put out a candle, a torch or a small campfire.'],
+        ['Clean or soil', 'Make a small thing (up to 1 cubic foot) clean or dirty.'],
+        ['Minor sensation', 'Make something cold, warm or give it a taste, for 1 hour (not living things).'],
+        ['Magic mark', 'A color, a small mark or a symbol on something, for 1 hour.'],
+        ['Minor creation', 'A small fake trinket or a tiny image that fits in your hand, until the end of your next turn.']
+      ],
+      note: 'Up to 3 of the 1-hour effects can be active at the same time.',
+      when: 'For fun, to impress people or to fix small things. Not in a fight.' }
   };
 
   const spellGroups = [

@@ -47,8 +47,8 @@
         buttons: savedButtons('calm', 'Some failed 😌', 'Everyone saved') });
     },
     tongues() { note('🗣️ Tongues', ['For 1 hour you understand every language, and everyone understands you.']); },
-    illusion() { note('🪄 Minor Illusion', ['Tell the DM what sound or small object you make (1 minute).', 'Ideas: ' + D.spells.illusion.ex.join(' · ')]); },
-    prestidigitation() { note('✨ Prestidigitation', ['Tell the DM which small trick you do.', 'Ideas: ' + D.spells.prestidigitation.ex.join(' · ')]); }
+    illusion() { note('🪄 Minor Illusion', ['Tell the DM: a <b>sound</b> or an <b>image</b>, and what exactly (1 minute).']); },
+    prestidigitation() { note('✨ Prestidigitation', ['Tell the DM which trick you do: ' + D.spells.prestidigitation.opts.map((o) => o[0].toLowerCase()).join(', ') + '.']); }
   };
 
   APP.cast = (id) => {
