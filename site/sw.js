@@ -1,5 +1,5 @@
 /* Offline cache: after opening once, the app also works without internet. */
-const CACHE = 'sf-dnd-v12';
+const CACHE = 'sf-dnd-v13';
 const FILES = [
   './', 'index.html', 'manifest.json', 'css/style.css',
   'js/data.js', 'js/core.js', 'js/pim.js', 'js/flow.js', 'js/views.js', 'js/main.js',
@@ -19,11 +19,11 @@ self.addEventListener('activate', (e) => {
     .then(() => self.clients.claim()));
 });
 
-/* Eerst het netwerk (altijd de nieuwste versie), anders de cache. */
+/* Network first, always revalidated with the server (GitHub Pages caches 10 min), cache when offline. */
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    fetch(e.request)
+    fetch(e.request, { cache: 'no-cache' })
       .then((res) => {
         const copy = res.clone();
         caches.open(CACHE).then((c) => c.put(e.request, copy));
