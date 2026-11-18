@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Charlie Dompler — Wild Magic Sorcerer 5</title>
+<style>
+@page { size: A4; margin: 0; }
+* { box-sizing: border-box; }
+:root { --ink: #151515; --y: #ffd93d; --yl: #fff4c2; --yd: #d9a600; --pk: #ff8cc6; --pl: #ffe1f0; --mu: #5d5d6b; --ok: #c9f6da; --bad: #ffd6d6; --mid: #fff1c7; }
+body { margin: 0; color: var(--ink); font: 9pt/1.32 "Segoe UI", "Trebuchet MS", system-ui, sans-serif; background: #fff; }
+.page { width: 210mm; height: 297mm; padding: 9mm 10mm; overflow: hidden; break-after: page; display: flex; flex-direction: column; gap: 3.2mm; }
+.page:last-child { break-after: auto; }
+h2 { margin: 0 0 1.5mm; font-size: 11pt; border-bottom: 2px solid var(--ink); padding-bottom: .6mm; }
+.box { border: 2px solid var(--ink); border-radius: 3mm; padding: 2.4mm 3mm; }
+.muted { color: var(--mu); }
+.head { display: flex; align-items: center; gap: 4mm; border: 2.5px solid var(--ink); border-radius: 4mm; padding: 2.5mm 4mm; background: var(--yl); }
+.head svg { width: 19mm; height: 19mm; flex: none; }
+.head h1 { margin: 0; font-size: 20pt; line-height: 1.05; }
+.head .line { font-weight: 700; font-size: 10.5pt; }
+.head .tag { margin-left: auto; text-align: right; font-weight: 700; }
+.stats { display: grid; grid-template-columns: repeat(8, 1fr); gap: 2mm; }
+.stat { border: 2px solid var(--ink); border-radius: 3mm; text-align: center; padding: 1.2mm .5mm; background: var(--yl); }
+.stat small { display: block; font-weight: 700; font-size: 7pt; text-transform: uppercase; letter-spacing: .2px; }
+.stat b { display: block; font-size: 15pt; line-height: 1.15; }
+.stat em { display: block; font-style: normal; font-size: 6.6pt; color: var(--mu); }
+.abil { display: grid; grid-template-columns: repeat(6, 1fr); gap: 2mm; }
+.ab { border: 2px solid var(--ink); border-radius: 3mm; text-align: center; padding: 1mm; }
+.ab .n { font-weight: 800; font-size: 8.5pt; }
+.ab b { display: block; font-size: 16pt; line-height: 1.1; }
+.ab .sc { font-size: 7.5pt; color: var(--mu); }
+.ab .sv { display: block; font-weight: 700; font-size: 8pt; margin-top: .4mm; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; }
+.cols3 { display: grid; grid-template-columns: 1.05fr 1fr; gap: 3mm; }
+.skills { columns: 2; column-gap: 4mm; }
+.sk { display: flex; justify-content: space-between; padding: .45mm 0; border-bottom: 1px dashed #ccc; break-inside: avoid; }
+.sk.p { font-weight: 700; }
+.sk span:first-child::before { content: "○ "; }
+.sk.p span:first-child::before { content: "● "; }
+.trk { display: flex; justify-content: space-between; align-items: center; padding: .9mm 0; border-bottom: 1px dashed #ccc; }
+.trk:last-child { border-bottom: 0; }
+.cb { display: inline-block; width: 4mm; height: 4mm; border: 1.6px solid var(--ink); border-radius: 1mm; margin-left: 1mm; vertical-align: middle; }
+.cb.r { border-radius: 50%; }
+.feats { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6mm 3mm; }
+.ft b { display: block; font-size: 9pt; }
+.ft { border-left: 3px solid var(--yd); padding-left: 2mm; break-inside: avoid; }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; vertical-align: top; padding: .9mm 1.2mm; border-bottom: 1px solid #d5d5dc; }
+th { font-size: 7.4pt; text-transform: uppercase; color: var(--mu); border-bottom: 2px solid var(--ink); }
+td.c { white-space: nowrap; }
+.lv { display: inline-block; min-width: 5mm; text-align: center; font-weight: 800; border: 1.5px solid var(--ink); border-radius: 2mm; padding: 0 1mm; background: var(--pl); }
+.how ol { margin: 0; padding-left: 5mm; }
+.how li { margin: .6mm 0; }
+.note { background: var(--yl); border-radius: 2mm; padding: 1.5mm 2.5mm; }
+.surge td:first-child { font-weight: 800; white-space: nowrap; width: 13mm; }
+.surge td { padding: 1mm 1.5mm; font-size: 8.6pt; }
+.surge tr.g td:first-child { background: var(--ok); }
+.surge tr.m td:first-child { background: var(--mid); }
+.surge tr.b td:first-child { background: var(--bad); }
+.legend span { display: inline-block; padding: 0 2mm; border-radius: 1.5mm; margin-right: 2mm; font-weight: 700; }
+.foot { margin-top: auto; font-size: 7pt; color: var(--mu); text-align: right; }
+</style>
+</head>
+<body>
+
+<!-- ===================== PAGE 1 ===================== -->
+<section class="page">
+  <div class="head">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><ellipse cx="50" cy="57" rx="38" ry="37" fill="#ffd93d" stroke="#151515" stroke-width="4"/><path d="M12 54C9 24 29 7 52 7C77 7 93 25 88 54L81 41L73 51L65 37L55 49L46 35L37 49L28 37L20 51Z" fill="#3a2a1a" stroke="#151515" stroke-width="4" stroke-linejoin="round"/><ellipse cx="37" cy="62" rx="8" ry="9" fill="#fff" stroke="#151515" stroke-width="3"/><circle cx="37" cy="65" r="3.5" fill="#151515"/><path d="M28.6 61A8.4 9 0 0 1 45.4 61Z" fill="#ffd93d" stroke="#151515" stroke-width="3" stroke-linejoin="round"/><ellipse cx="63" cy="62" rx="8" ry="9" fill="#fff" stroke="#151515" stroke-width="3"/><circle cx="63" cy="65" r="3.5" fill="#151515"/><path d="M54.6 61A8.4 9 0 0 1 71.4 61Z" fill="#ffd93d" stroke="#151515" stroke-width="3" stroke-linejoin="round"/><path d="M49 70Q46 75 51 75" fill="none" stroke="#151515" stroke-width="2.5" stroke-linecap="round"/><path d="M40 83Q50 80 60 83" fill="none" stroke="#151515" stroke-width="3.5" stroke-linecap="round"/></svg>
+    <div><h1>Charlie Dompler</h1><div class="line">Sorcerer 5 (Wild Magic Sorcery) · Human · Merchant</div><div class="muted">D&amp;D 2024 rules · Medium · Common + 2 languages</div></div>
+    <div class="tag">Level 5<br>Proficiency +3</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><small>Max HP</small><b>47</b><em>Hit Dice 5d6</em></div>
+    <div class="stat"><small>AC</small><b>15</b><em>Mage Armor (12 without)</em></div>
+    <div class="stat"><small>Initiative</small><b>+2</b><em>DEX</em></div>
+    <div class="stat"><small>Speed</small><b>30 ft</b><em>&nbsp;</em></div>
+    <div class="stat"><small>Spell save DC</small><b>15</b><em>16 with Innate Sorcery</em></div>
+    <div class="stat"><small>Spell attack</small><b>+7</b><em>Adv. with Innate Sorcery</em></div>
+    <div class="stat"><small>Passive Perc.</small><b>13</b><em>&nbsp;</em></div>
+    <div class="stat"><small>Sorcery Points</small><b>5</b><em>Long rest</em></div>
+  </div>
+
+  <div class="abil">
+    <div class="ab"><div class="n">STR</div><b>−1</b><span class="sc">8</span><span class="sv">save −1</span></div>
+    <div class="ab"><div class="n">DEX</div><b>+2</b><span class="sc">14</span><span class="sv">save +2</span></div>
+    <div class="ab"><div class="n">CON</div><b>+3</b><span class="sc">16</span><span class="sv">● save +6</span></div>
+    <div class="ab"><div class="n">INT</div><b>−1</b><span class="sc">8</span><span class="sv">save −1</span></div>
+    <div class="ab"><div class="n">WIS</div><b>+0</b><span class="sc">10</span><span class="sv">save +0</span></div>
+    <div class="ab"><div class="n">CHA</div><b>+4</b><span class="sc">18</span><span class="sv">● save +7</span></div>
+  </div>
+
+  <div class="cols3">
+    <div class="box"><h2>Skills <span class="muted" style="font-size:7.5pt;font-weight:400">● = proficient</span></h2>
+      <div class="skills">
+        <div class="sk"><span>Acrobatics</span><span>+2</span></div>
+        <div class="sk p"><span>Animal Handling</span><span>+3</span></div>
+        <div class="sk"><span>Arcana</span><span>−1</span></div>
+        <div class="sk"><span>Athletics</span><span>−1</span></div>
+        <div class="sk"><span>Deception</span><span>+4</span></div>
+        <div class="sk"><span>History</span><span>−1</span></div>
+        <div class="sk p"><span>Insight</span><span>+3</span></div>
+        <div class="sk p"><span>Intimidation</span><span>+7</span></div>
+        <div class="sk"><span>Investigation</span><span>−1</span></div>
+        <div class="sk"><span>Medicine</span><span>+0</span></div>
+        <div class="sk"><span>Nature</span><span>−1</span></div>
+        <div class="sk p"><span>Perception</span><span>+3</span></div>
+        <div class="sk"><span>Performance</span><span>+4</span></div>
+        <div class="sk p"><span>Persuasion</span><span>+7</span></div>
+        <div class="sk"><span>Religion</span><span>−1</span></div>
+        <div class="sk"><span>Sleight of Hand</span><span>+2</span></div>
+        <div class="sk"><span>Stealth</span><span>+2</span></div>
+        <div class="sk"><span>Survival</span><span>+0</span></div>
+      </div>
+      <p class="muted" style="margin:1.5mm 0 0">Tools: Navigator's Tools · Weapons: simple · Armor: none</p>
+    </div>
+    <div class="box"><h2>Trackers</h2>
+      <div class="trk"><b>Spell slots level 1</b><span><i class="cb"></i><i class="cb"></i><i class="cb"></i><i class="cb"></i></span></div>
+      <div class="trk"><b>Spell slots level 2</b><span><i class="cb"></i><i class="cb"></i><i class="cb"></i></span></div>
+      <div class="trk"><b>Spell slots level 3</b><span><i class="cb"></i><i class="cb"></i></span></div>
+      <div class="trk"><b>Sorcery Points</b><span><i class="cb r"></i><i class="cb r"></i><i class="cb r"></i><i class="cb r"></i><i class="cb r"></i></span></div>
+      <div class="trk"><b>Tides of Chaos</b><span class="muted">used → <i class="cb"></i></span></div>
+      <div class="trk"><b>Innate Sorcery</b><span><i class="cb"></i><i class="cb"></i></span></div>
+      <div class="trk"><b>Luck Points</b><span><i class="cb r"></i><i class="cb r"></i><i class="cb r"></i></span></div>
+      <div class="trk"><b>Heroic Inspiration</b><span><i class="cb r"></i></span></div>
+      <div class="trk"><b>Sorcerous Restoration</b><span><i class="cb"></i></span></div>
+      <div class="trk"><b>Hit Dice (d6)</b><span><i class="cb"></i><i class="cb"></i><i class="cb"></i><i class="cb"></i><i class="cb"></i></span></div>
+      <div class="trk"><b>Death saves</b><span>✔ <i class="cb r"></i><i class="cb r"></i><i class="cb r"></i> &nbsp;✘ <i class="cb r"></i><i class="cb r"></i><i class="cb r"></i></span></div>
+    </div>
+  </div>
+
+  <div class="box"><h2>Features</h2>
+    <div class="feats">
+      <div class="ft"><b>Wild Magic Surge</b>Once per turn after casting a Sorcerer spell with a slot, you may roll a d20. On a 20: roll on the Surge table (page 3).</div>
+      <div class="ft"><b>Tides of Chaos</b>Advantage on one D20 Test (declare before rolling). Then it's spent until you cast a Sorcerer spell with a slot (→ automatic surge, Tides back) or finish a Long Rest.</div>
+      <div class="ft"><b>Innate Sorcery</b>Bonus action, 1 minute: +1 spell save DC and advantage on Sorcerer spell attack rolls. 2× per Long Rest.</div>
+      <div class="ft"><b>Font of Magic</b>Bonus action: turn Sorcery Points into a slot (L1: 2 SP · L2: 3 SP · L3: 5 SP; gone at Long Rest). No action: turn a slot into SP equal to its level.</div>
+      <div class="ft"><b>Metamagic (1 per spell)</b><u>Careful</u> (1 SP): up to 4 creatures auto-succeed on the save and take no damage on a success. <u>Subtle</u> (1 SP): cast without verbal, somatic or (non-costly) material components.</div>
+      <div class="ft"><b>Sorcerous Restoration</b>After a Short Rest, regain up to 2 Sorcery Points. Once per Long Rest.</div>
+      <div class="ft"><b>Lucky (Merchant)</b>3 Luck Points per Long Rest: advantage on your d20, or disadvantage on an attack roll against you.</div>
+      <div class="ft"><b>War Caster</b>Advantage on CON saves to keep concentration. Cast a 1-action spell at a creature as an opportunity attack.</div>
+      <div class="ft"><b>Tough (Human)</b>+10 max HP (already included).</div>
+      <div class="ft"><b>Human</b>Heroic Inspiration after every Long Rest. Extra skill: Perception.</div>
+    </div>
+  </div>
+  <div class="foot">Charlie Dompler · page 1/3</div>
+</section>
+
+<!-- ===================== PAGE 2 ===================== -->
+<section class="page">
+  <div class="box"><h2>Attacks &amp; cantrips <span class="muted" style="font-size:7.5pt;font-weight:400">cantrips never use a slot and don't recharge Tides</span></h2>
+    <table>
+      <tr><th>Name</th><th>Time</th><th>Range</th><th>Hit / save</th><th>Effect</th></tr>
+      <tr><td><b>Sorcerous Burst</b></td><td class="c">Action</td><td class="c">120 ft</td><td class="c">+7</td><td>2d8 (acid, cold, fire, lightning, poison, psychic or thunder). Every 8 rolled adds another d8 (max 4 extra).</td></tr>
+      <tr><td><b>Mind Sliver</b></td><td class="c">Action</td><td class="c">60 ft</td><td class="c">INT DC 15</td><td>2d6 psychic, and it subtracts 1d4 from its next save before your next turn ends. Use before Fireball or Counterspell.</td></tr>
+      <tr><td><b>Shocking Grasp</b></td><td class="c">Action</td><td class="c">Touch</td><td class="c">+7</td><td>2d8 lightning, and it can't make opportunity attacks until its next turn. Then walk away.</td></tr>
+      <tr><td><b>Mage Hand</b></td><td class="c">Action</td><td class="c">30 ft</td><td class="c">—</td><td>Floating hand for 1 minute: open doors, grab things up to 10 lb (Magic action to use).</td></tr>
+      <tr><td><b>Message</b></td><td class="c">Action</td><td class="c">120 ft</td><td class="c">—</td><td>Whisper to one creature; only it hears you and it can whisper back.</td></tr>
+      <tr><td><b>Dagger</b> (×2)</td><td class="c">Action</td><td class="c">5 / 20-60 ft</td><td class="c">+5</td><td>1d4+2 piercing. Finesse, light, thrown.</td></tr>
+    </table>
+  </div>
+
+  <div class="box"><h2>Prepared spells <span class="muted" style="font-size:7.5pt;font-weight:400">every spell here uses a slot → recharges Tides (and surges if Tides was spent)</span></h2>
+    <table>
+      <tr><th>Lvl</th><th>Name</th><th>Time</th><th>Range</th><th>Effect</th></tr>
+      <tr><td><span class="lv">1</span></td><td><b>Shield</b></td><td class="c">Reaction</td><td class="c">Self</td><td>When hit by an attack: +5 AC until your next turn (AC 20), also against that attack. Blocks Magic Missile. <b>Recharges Tides on an enemy's turn.</b></td></tr>
+      <tr><td><span class="lv">1</span></td><td><b>Mage Armor</b></td><td class="c">Action</td><td class="c">Touch</td><td>8 hours: AC 13 + DEX (15). Cast it every morning.</td></tr>
+      <tr><td><span class="lv">1</span></td><td><b>Chromatic Orb</b></td><td class="c">Action</td><td class="c">90 ft</td><td>Spell attack +7: 3d8 of a type you pick. If two d8s match, it leaps to another target within 30 ft. Needs a 50 gp diamond (not used up).</td></tr>
+      <tr><td><span class="lv">1</span></td><td><b>Disguise Self</b></td><td class="c">Action</td><td class="c">Self</td><td>1 hour: look like someone else (clothes and gear too). Investigation vs DC 15 to see through it.</td></tr>
+      <tr><td><span class="lv">2</span></td><td><b>Misty Step</b></td><td class="c">Bonus</td><td class="c">Self</td><td>Teleport up to 30 ft to a space you can see.</td></tr>
+      <tr><td><span class="lv">2</span></td><td><b>Detect Thoughts</b> <span class="muted">(conc.)</span></td><td class="c">Action</td><td class="c">30 ft</td><td>1 minute: sense minds nearby and read what's on someone's mind; WIS save to dig deeper. Subtle Spell = nobody notices.</td></tr>
+      <tr><td><span class="lv">2</span></td><td><b>Scorching Ray</b></td><td class="c">Action</td><td class="c">120 ft</td><td>3 rays, spell attack +7 each, 2d6 fire per ray. Spread or stack them.</td></tr>
+      <tr><td><span class="lv">3</span></td><td><b>Fireball</b></td><td class="c">Action</td><td class="c">150 ft</td><td>20 ft radius, DEX save: 8d6 fire, half on a success. Careful Spell keeps Pim safe.</td></tr>
+      <tr><td><span class="lv">3</span></td><td><b>Counterspell</b></td><td class="c">Reaction</td><td class="c">60 ft</td><td>A creature casting a spell makes a CON save. Fail: the spell does nothing (their slot isn't used).</td></tr>
+    </table>
+  </div>
+
+  <div class="cols">
+    <div class="box how"><h2>How Tides &amp; surges work</h2>
+      <ol>
+        <li><b>Tides</b> = advantage on one d20 roll of yours: attack, save, check or initiative. Then it's empty.</li>
+        <li>The <b>next spell you cast with a slot</b> → roll d100 on the Surge table right away, and Tides is full again.</li>
+        <li>Cantrips do nothing. If no slot spell comes before your Long Rest, Tides simply comes back.</li>
+        <li>Without Tides: after a slot spell you may roll a d20; on a 20 you surge (5%).</li>
+      </ol>
+      <p class="note" style="margin:1.5mm 0 0">Max ≈ 13 Tides per day at level 5 (1 + 9 slots + ~3 extra slots from Sorcery Points). Max 1 slot per turn — but Shield works on enemy turns.</p>
+    </div>
+    <div class="box how"><h2>Turn plan</h2>
+      <ol>
+        <li><b>Morning:</b> Mage Armor (AC 15).</li>
+        <li><b>Initiative:</b> use Tides on it.</li>
+        <li><b>Round 1:</b> bonus action Innate Sorcery, action Fireball (Careful if Pim is close) → surge, Tides back.</li>
+        <li><b>Next rounds:</b> Chromatic Orb or Scorching Ray, Tides on the attack roll; or Sorcerous Burst to save slots.</li>
+        <li><b>Enemy hits you:</b> Shield → surge, Tides back.</li>
+        <li><b>Enemy caster:</b> Counterspell.</li>
+        <li><b>Talking:</b> Subtle Detect Thoughts, then let Pim talk.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="box"><h2>Gear</h2>
+    Arcane focus (crystal) · 2 daggers · spear · Dungeoneer's Pack · Navigator's Tools · 2 pouches · traveler's clothes · diamond (50 gp) for Chromatic Orb · 0 gp left
+  </div>
+  <div class="foot">Charlie Dompler · page 2/3</div>
+</section>
+
+<!-- ===================== PAGE 3 ===================== -->
+<section class="page">
+  <div class="box"><h2>Wild Magic Surge (roll d100)</h2>
+    <p class="legend" style="margin:0 0 1.5mm"><span style="background:var(--ok)">mostly good</span><span style="background:var(--mid)">weird / mixed</span><span style="background:var(--bad)">mostly bad</span></p>
+    <table class="surge">
+      <tr class="m"><td>01–04</td><td>Chain reaction: for 1 minute, roll on this table at the start of each of your turns (ignore this row).</td></tr>
+      <tr class="g"><td>05–08</td><td>A friendly creature appears within 60 ft for 1 minute (DM controls it). d4: 1 Modron Duodrone · 2 Flumph · 3 Modron Monodrone · 4 Unicorn.</td></tr>
+      <tr class="g"><td>09–12</td><td>For 1 minute you regain 5 HP at the start of each of your turns.</td></tr>
+      <tr class="g"><td>13–16</td><td>Your next spell with a save in the next minute: targets have disadvantage on that save.</td></tr>
+      <tr class="m"><td>17–20</td><td>Odd effect for 1 minute (d8): 1 music only those within 5 ft hear · 2 you grow one size · 3 feather beard until you sneeze · 4 you must shout · 5 illusory butterflies around you · 6 third eye: advantage on Perception · 7 pink bubbles when you speak · 8 blue skin for 24 hours (Remove Curse ends it).</td></tr>
+      <tr class="g"><td>21–24</td><td>For 1 minute, spells that take an action can be cast as a bonus action.</td></tr>
+      <tr class="b"><td>25–28</td><td>You vanish to the Astral Plane until the end of your next turn, then return.</td></tr>
+      <tr class="g"><td>29–32</td><td>Your next damage spell in the next minute deals maximum damage (Fireball = 48).</td></tr>
+      <tr class="g"><td>33–36</td><td>Resistance to all damage for 1 minute.</td></tr>
+      <tr class="b"><td>37–40</td><td>You become a potted plant until the start of your next turn: incapacitated and vulnerable to all damage.</td></tr>
+      <tr class="g"><td>41–44</td><td>For 1 minute you can teleport 20 ft as a bonus action on each of your turns.</td></tr>
+      <tr class="g"><td>45–48</td><td>You and up to 3 creatures within 30 ft turn invisible for 1 minute (ends for one who attacks, deals damage or casts).</td></tr>
+      <tr class="g"><td>49–52</td><td>Spectral shield for 1 minute: +2 AC and immune to Magic Missile.</td></tr>
+      <tr class="g"><td>53–56</td><td>You get one extra action this turn.</td></tr>
+      <tr class="m"><td>57–60</td><td>You cast a random spell; it needs no concentration and lasts its full duration (d10): 1 Confusion · 2 Fireball · 3 Fog Cloud · 4 Fly on a random creature within 60 ft · 5 Grease · 6 Levitate on you · 7 Magic Missile at level 5 · 8 Mirror Image · 9 Polymorph on you (fail the save = goat) · 10 See Invisibility.</td></tr>
+      <tr class="m"><td>61–64</td><td>For 1 minute, flammable non-magical things you touch (not held by others) catch fire and take 1d4 fire.</td></tr>
+      <tr class="g"><td>65–68</td><td>If you die within the next hour, you come back right away as with Reincarnate.</td></tr>
+      <tr class="b"><td>69–72</td><td>You are frightened until the end of your next turn (the DM picks of what).</td></tr>
+      <tr class="m"><td>73–76</td><td>You teleport up to 60 ft to a space you can see.</td></tr>
+      <tr class="m"><td>77–80</td><td>A random creature within 60 ft is poisoned for 1d4 hours (can be an ally or you).</td></tr>
+      <tr class="g"><td>81–84</td><td>Bright light 30 ft around you for 1 minute; anyone ending their turn within 5 ft of you is blinded until their next turn ends.</td></tr>
+      <tr class="g"><td>85–88</td><td>Up to 3 creatures you choose within 30 ft take 1d10 necrotic; you regain HP equal to the total.</td></tr>
+      <tr class="g"><td>89–92</td><td>Up to 3 creatures you choose within 30 ft take 4d10 lightning.</td></tr>
+      <tr class="b"><td>93–96</td><td>You and everyone within 30 ft are vulnerable to piercing damage for 1 minute.</td></tr>
+      <tr class="g"><td>97–00</td><td>d6: 1 you heal 2d10 · 2 an ally within 300 ft heals 2d10 · 3 regain your lowest used spell slot · 4 an ally regains their lowest used slot · 5 regain all Sorcery Points · 6 every effect of 17–20 at once.</td></tr>
+    </table>
+  </div>
+  <div class="box note"><b>Coming at level 6 — Bend Luck:</b> reaction + 1 Sorcery Point: add or subtract 1d4 from someone's d20 roll you can see.</div>
+  <div class="foot">Charlie Dompler · page 3/3 · surge effects summarised from the 2024 Player's Handbook</div>
+</section>
+
+</body>
+</html>
