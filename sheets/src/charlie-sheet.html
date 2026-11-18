@@ -51,8 +51,8 @@ td.c { white-space: nowrap; }
 .how ol { margin: 0; padding-left: 5mm; }
 .how li { margin: .6mm 0; }
 .note { background: var(--yl); border-radius: 2mm; padding: 1.5mm 2.5mm; }
-.surge td:first-child { font-weight: 800; white-space: nowrap; width: 13mm; }
-.surge td { padding: 1mm 1.5mm; font-size: 8.6pt; }
+.surge td:first-child { font-weight: 800; white-space: nowrap; width: 8mm; text-align: center; }
+.surge td { padding: .5mm 1.4mm; font-size: 7.9pt; line-height: 1.22; }
 .surge tr.g td:first-child { background: var(--ok); }
 .surge tr.m td:first-child { background: var(--mid); }
 .surge tr.b td:first-child { background: var(--bad); }
@@ -131,7 +131,7 @@ td.c { white-space: nowrap; }
 
   <div class="box"><h2>Features</h2>
     <div class="feats">
-      <div class="ft"><b>Wild Magic Surge</b>Once per turn after casting a Sorcerer spell with a slot, you may roll a d20. On a 20: roll on the Surge table (page 3).</div>
+      <div class="ft"><b>Wild Magic Surge</b>Once per turn after casting a Sorcerer spell with a slot, you may roll a d20. On a 20: roll on the Surge table (pages 3–4).</div>
       <div class="ft"><b>Tides of Chaos</b>Advantage on one D20 Test (declare before rolling). Then it's spent until you cast a Sorcerer spell with a slot (→ automatic surge, Tides back) or finish a Long Rest.</div>
       <div class="ft"><b>Innate Sorcery</b>Bonus action, 1 minute: +1 spell save DC and advantage on Sorcerer spell attack rolls. 2× per Long Rest.</div>
       <div class="ft"><b>Font of Magic</b>Bonus action: turn Sorcery Points into a slot (L1: 2 SP · L2: 3 SP · L3: 5 SP; gone at Long Rest). No action: turn a slot into SP equal to its level.</div>
@@ -143,7 +143,7 @@ td.c { white-space: nowrap; }
       <div class="ft"><b>Human</b>Heroic Inspiration after every Long Rest. Extra skill: Perception.</div>
     </div>
   </div>
-  <div class="foot">Charlie Dompler · page 1/3</div>
+  <div class="foot">Charlie Dompler · page 1/4</div>
 </section>
 
 <!-- ===================== PAGE 2 ===================== -->
@@ -201,44 +201,38 @@ td.c { white-space: nowrap; }
   <div class="box"><h2>Gear</h2>
     Arcane focus (crystal) · 2 daggers · spear · Dungeoneer's Pack · Navigator's Tools · 2 pouches · traveler's clothes · diamond (50 gp) for Chromatic Orb · 0 gp left
   </div>
-  <div class="foot">Charlie Dompler · page 2/3</div>
+  <div class="foot">Charlie Dompler · page 2/4</div>
 </section>
 
-<!-- ===================== PAGE 3 ===================== -->
+<!-- ===================== PAGES 3-4: surge table, filled from site/charlie/surge.js ===================== -->
 <section class="page">
-  <div class="box"><h2>Wild Magic Surge (roll d100)</h2>
-    <p class="legend" style="margin:0 0 1.5mm"><span style="background:var(--ok)">mostly good</span><span style="background:var(--mid)">weird / mixed</span><span style="background:var(--bad)">mostly bad</span></p>
-    <table class="surge">
-      <tr class="m"><td>01–04</td><td>Chain reaction: for 1 minute, roll on this table at the start of each of your turns (ignore this row).</td></tr>
-      <tr class="g"><td>05–08</td><td>A friendly creature appears within 60 ft for 1 minute (DM controls it). d4: 1 Modron Duodrone · 2 Flumph · 3 Modron Monodrone · 4 Unicorn.</td></tr>
-      <tr class="g"><td>09–12</td><td>For 1 minute you regain 5 HP at the start of each of your turns.</td></tr>
-      <tr class="g"><td>13–16</td><td>Your next spell with a save in the next minute: targets have disadvantage on that save.</td></tr>
-      <tr class="m"><td>17–20</td><td>Odd effect for 1 minute (d8): 1 music only those within 5 ft hear · 2 you grow one size · 3 feather beard until you sneeze · 4 you must shout · 5 illusory butterflies around you · 6 third eye: advantage on Perception · 7 pink bubbles when you speak · 8 blue skin for 24 hours (Remove Curse ends it).</td></tr>
-      <tr class="g"><td>21–24</td><td>For 1 minute, spells that take an action can be cast as a bonus action.</td></tr>
-      <tr class="b"><td>25–28</td><td>You vanish to the Astral Plane until the end of your next turn, then return.</td></tr>
-      <tr class="g"><td>29–32</td><td>Your next damage spell in the next minute deals maximum damage (Fireball = 48).</td></tr>
-      <tr class="g"><td>33–36</td><td>Resistance to all damage for 1 minute.</td></tr>
-      <tr class="b"><td>37–40</td><td>You become a potted plant until the start of your next turn: incapacitated and vulnerable to all damage.</td></tr>
-      <tr class="g"><td>41–44</td><td>For 1 minute you can teleport 20 ft as a bonus action on each of your turns.</td></tr>
-      <tr class="g"><td>45–48</td><td>You and up to 3 creatures within 30 ft turn invisible for 1 minute (ends for one who attacks, deals damage or casts).</td></tr>
-      <tr class="g"><td>49–52</td><td>Spectral shield for 1 minute: +2 AC and immune to Magic Missile.</td></tr>
-      <tr class="g"><td>53–56</td><td>You get one extra action this turn.</td></tr>
-      <tr class="m"><td>57–60</td><td>You cast a random spell; it needs no concentration and lasts its full duration (d10): 1 Confusion · 2 Fireball · 3 Fog Cloud · 4 Fly on a random creature within 60 ft · 5 Grease · 6 Levitate on you · 7 Magic Missile at level 5 · 8 Mirror Image · 9 Polymorph on you (fail the save = goat) · 10 See Invisibility.</td></tr>
-      <tr class="m"><td>61–64</td><td>For 1 minute, flammable non-magical things you touch (not held by others) catch fire and take 1d4 fire.</td></tr>
-      <tr class="g"><td>65–68</td><td>If you die within the next hour, you come back right away as with Reincarnate.</td></tr>
-      <tr class="b"><td>69–72</td><td>You are frightened until the end of your next turn (the DM picks of what).</td></tr>
-      <tr class="m"><td>73–76</td><td>You teleport up to 60 ft to a space you can see.</td></tr>
-      <tr class="m"><td>77–80</td><td>A random creature within 60 ft is poisoned for 1d4 hours (can be an ally or you).</td></tr>
-      <tr class="g"><td>81–84</td><td>Bright light 30 ft around you for 1 minute; anyone ending their turn within 5 ft of you is blinded until their next turn ends.</td></tr>
-      <tr class="g"><td>85–88</td><td>Up to 3 creatures you choose within 30 ft take 1d10 necrotic; you regain HP equal to the total.</td></tr>
-      <tr class="g"><td>89–92</td><td>Up to 3 creatures you choose within 30 ft take 4d10 lightning.</td></tr>
-      <tr class="b"><td>93–96</td><td>You and everyone within 30 ft are vulnerable to piercing damage for 1 minute.</td></tr>
-      <tr class="g"><td>97–00</td><td>d6: 1 you heal 2d10 · 2 an ally within 300 ft heals 2d10 · 3 regain your lowest used spell slot · 4 an ally regains their lowest used slot · 5 regain all Sorcery Points · 6 every effect of 17–20 at once.</td></tr>
-    </table>
+  <div class="box"><h2>Wild Magic Surge — d100 · 1–50</h2>
+    <p class="legend" style="margin:0 0 1.5mm"><span style="background:var(--ok)">mostly good</span><span style="background:var(--mid)">weird / mixed</span><span style="background:var(--bad)">mostly bad</span>
+      <span class="muted" style="font-weight:400">House rule: replaces the Player's Handbook table. Surge spells: no Metamagic, no Concentration (full duration). DC = your spell save DC.</span></p>
+    <table class="surge" id="surgeA"></table>
   </div>
-  <div class="box note"><b>Coming at level 6 — Bend Luck:</b> reaction + 1 Sorcery Point: add or subtract 1d4 from someone's d20 roll you can see.</div>
-  <div class="foot">Charlie Dompler · page 3/3 · surge effects summarised from the 2024 Player's Handbook</div>
+  <div class="foot">Charlie Dompler · page 3/4</div>
 </section>
-
+<section class="page">
+  <div class="box"><h2>Wild Magic Surge — d100 · 51–100</h2>
+    <table class="surge" id="surgeB"></table>
+  </div>
+  <div class="box note"><b>Coming at level 6 — Bend Luck:</b> reaction + 1 Sorcery Point: add or subtract 1d4 from a d20 Test of a creature you can see.</div>
+  <div class="foot" id="credit">Charlie Dompler · page 4/4</div>
+</section>
+<script src="../../site/charlie/surge.js"></script>
+<script>
+  (function () {
+    var rows = window.SURGE.rows;
+    function fill(id, from, to) {
+      var html = '';
+      for (var i = from; i < to; i++) html += '<tr class="' + rows[i][0] + '"><td>' + (i + 1) + '</td><td>' + rows[i][1] + '</td></tr>';
+      document.getElementById(id).innerHTML = html;
+    }
+    fill('surgeA', 0, 50);
+    fill('surgeB', 50, 100);
+    document.getElementById('credit').textContent = 'Charlie Dompler · page 4/4 · table summarised from "' + window.SURGE.credit + '" · ' + window.SURGE.source;
+  })();
+</script>
 </body>
 </html>

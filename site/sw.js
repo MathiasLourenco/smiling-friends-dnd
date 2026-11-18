@@ -1,9 +1,12 @@
 /* Offline cache: after opening once, the app also works without internet. */
-const CACHE = 'sf-dnd-v10';
+const CACHE = 'sf-dnd-v11';
 const FILES = [
   './', 'index.html', 'manifest.json', 'css/style.css',
   'js/data.js', 'js/core.js', 'js/pim.js', 'js/flow.js', 'js/views.js', 'js/main.js',
-  'icons/icon.svg', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png'
+  'icons/icon.svg', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png',
+  'charlie/', 'charlie/index.html', 'charlie/manifest.json', 'charlie/charlie.css',
+  'charlie/surge.js', 'charlie/data.js', 'charlie/logic.js', 'charlie/ui.js',
+  'charlie/icon.svg', 'charlie/icon-180.png', 'charlie/icon-192.png', 'charlie/icon-512.png'
 ];
 
 self.addEventListener('install', (e) => {
