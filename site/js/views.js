@@ -91,13 +91,13 @@
     return `<div class="sprow ${c.conc === id ? 'active' : ''} ${empty ? 'empty' : ''}"><span class="emoji">${sp.emoji}</span>
       <div class="sp-main"><div class="sp-name"><b>${sp.name}</b><span class="pill t-${sp.time}">${TIME_SHORT[sp.time]}</span>
         <span class="pill lv">${lvl}</span>${sp.conc ? '<span class="pill conc">Conc.</span>' : ''}${sp.save ? `<span class="pill sv">${sp.save} save</span>` : ''}<span class="rng">${sp.range}</span></div>
-        <small>${sp.wat}</small>${sp.ex ? `<div class="ex">${sp.ex.map((e) => `<span>${e}</span>`).join('')}</div>` : ''}</div>
+        <small>${sp.wat}</small><p class="when"><b>When:</b> ${sp.when}</p>${sp.ex ? `<div class="ex"><em>Ideas:</em>${sp.ex.map((e) => `<span>${e}</span>`).join('')}</div>` : ''}</div>
       <div class="sp-btns">${btn(sp.level === 'bi' ? 'Use' : 'Cast', 'cast', id, 'xs')}</div></div>`;
   }
   const group = (g) => `<section class="card spgroup"><h3>${g[0]}</h3>${g[1].map(spRow).join('')}</section>`;
   const summary = () => `<div class="card slim"><div class="resline"><span>Spell save DC <b>${P.spellDC}</b></span><span>Spell attack <b>+${P.spellAtk}</b></span></div></div>`;
-  const viewSpells = () => `${summary()}<div class="grid"><div class="col">${D.spellGroups.slice(0, 3).map(group).join('')}</div>
-    <div class="col">${D.spellGroups.slice(3).map(group).join('')}</div></div>`;
+  const viewSpells = () => `${summary()}<div class="grid"><div class="col">${D.spellGroups.slice(0, 4).map(group).join('')}</div>
+    <div class="col">${D.spellGroups.slice(4).map(group).join('')}</div></div>`;
 
   /* ---------- Talk ---------- */
   function viewTalk() {
