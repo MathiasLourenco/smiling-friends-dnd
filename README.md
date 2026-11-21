@@ -29,6 +29,7 @@ D&D 2024 rules, level 5. Pim's app (`/`) is made for a brand-new player; Charlie
 - **Sheet**: abilities, saves and skills (tap to roll; Lucky and Heroic Inspiration after the roll), features and gear.
 - The surge table is a house rule: effects summarised from [Wild Magic Table: True 100](https://homebrewery.naturalcrit.com/share/-XaXNuZPQc4F) by Azure Spire Archive. It replaces the Player's Handbook table, so check with your DM.
 - Printable PDF: [`sheets/Charlie-sheet.pdf`](sheets/Charlie-sheet.pdf). Its surge table is loaded from [`site/charlie/surge.js`](site/charlie/surge.js).
+- D&D Beyond-style PDF: [`sheets/Charlie-sheet-DnDBeyond.pdf`](sheets/Charlie-sheet-DnDBeyond.pdf), Charlie on the fillable D&D Beyond character sheet (still fillable), with the surge table on pages 5–6. Made by [`sheets/src/charlie-dndbeyond.cjs`](sheets/src/charlie-dndbeyond.cjs) from any copy of that sheet (see the top of the script).
 
 ## Technical
 
